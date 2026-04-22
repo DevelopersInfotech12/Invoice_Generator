@@ -247,6 +247,7 @@ export default function InvoiceGenerator({ initialData = null }) {
   const [gstLoading, setGstLoading] = useState({from:false, to:false});
   const [gstError,   setGstError]   = useState({from:"",    to:""  });
   const [hdrVis,     setHdrVis]     = useState(false);
+  const [loginPrompt,setLoginPrompt]= useState(false);
 
   const { user } = useAuth();
 
@@ -275,7 +276,7 @@ export default function InvoiceGenerator({ initialData = null }) {
 
   /* ── Save or Update invoice ── */
   const handleSave = async () => {
-    if (!user) { showToast("Please login to save invoices.", false); return; }
+    if (!user) { setLoginPrompt(true); return; }
     setIsSaving(true);
     try {
       const payload = { ...inv, isProforma, subtotal, taxAmt, total };
@@ -385,6 +386,75 @@ export default function InvoiceGenerator({ initialData = null }) {
       `}</style>
 
       <Toast toast={toast}/>
+
+      {/* ── Login Prompt Modal ── */}
+      {loginPrompt && (
+        <div style={{
+          position:"fixed", inset:0, zIndex:10000,
+          background:"rgba(0,0,0,0.75)", backdropFilter:"blur(4px)",
+          display:"flex", alignItems:"center", justifyContent:"center",
+          padding:20,
+        }} onClick={()=>setLoginPrompt(false)}>
+          <div style={{
+            background:"#1A1610", border:"1px solid rgba(232,201,122,0.3)",
+            borderRadius:20, padding:"36px 32px", maxWidth:380, width:"100%",
+            boxShadow:"0 24px 60px rgba(0,0,0,0.8)",
+            animation:"ifadeup .3s ease both",
+          }} onClick={e=>e.stopPropagation()}>
+            {/* Icon */}
+            <div style={{
+              width:56, height:56, borderRadius:16, margin:"0 auto 20px",
+              background:"rgba(232,201,122,0.1)", border:"1px solid rgba(232,201,122,0.25)",
+              display:"flex", alignItems:"center", justifyContent:"center",
+            }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E8C97A" strokeWidth="1.8">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+              </svg>
+            </div>
+            <h3 style={{ margin:"0 0 8px", fontSize:18, fontWeight:700,
+              color:"#F5F2EC", textAlign:"center", fontFamily:"'DM Serif Display',serif" }}>
+              Save your invoice
+            </h3>
+            <p style={{ margin:"0 0 24px", fontSize:13, color:"#9A9080",
+              textAlign:"center", lineHeight:1.6 }}>
+              Sign in or create a free account to save invoices, edit them later and access them anytime.
+            </p>
+            <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+              <a href="/login" style={{
+                display:"block", padding:"13px",
+                background:"linear-gradient(135deg,#E8C97A,#B8913A)",
+                border:"none", borderRadius:12, color:"#1A1008",
+                fontSize:13, fontWeight:800, cursor:"pointer",
+                fontFamily:"inherit", letterSpacing:".02em",
+                textAlign:"center", textDecoration:"none",
+                boxShadow:"0 4px 18px rgba(232,201,122,.28)",
+              }}>
+                Sign In
+              </a>
+              <a href="/register" style={{
+                display:"block", padding:"13px",
+                background:"rgba(255,255,255,0.04)",
+                border:"1px solid rgba(255,255,255,0.1)",
+                borderRadius:12, color:"#D4CEC5",
+                fontSize:13, fontWeight:600, cursor:"pointer",
+                fontFamily:"inherit", textAlign:"center", textDecoration:"none",
+                transition:"all .2s",
+              }}>
+                Create Free Account
+              </a>
+              <button onClick={()=>setLoginPrompt(false)} style={{
+                background:"none", border:"none", cursor:"pointer",
+                fontSize:12, color:"#5A5347", fontFamily:"inherit",
+                padding:"6px", marginTop:2,
+              }}>
+                Continue without saving
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Print view */}
       <div id="inv-print" style={{display:"none"}}>
