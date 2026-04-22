@@ -855,6 +855,28 @@ export default function InvoiceGenerator({ initialData = null }) {
             </Card>
           </Section>
 
+
+          {/* ── Footer ── */}
+          <div style={{
+            textAlign:"center", paddingTop:40, paddingBottom:8,
+          }}>
+            <a
+              href="https://developersinfotech.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                fontSize:13, color:C.text4, textDecoration:"none",
+                fontFamily:"'DM Sans',sans-serif",
+                transition:"color .2s",
+                letterSpacing:".02em",
+              }}
+              onMouseOver={e=>e.target.style.color=C.gold}
+              onMouseOut={e=>e.target.style.color=C.text4}
+            >
+              Built by <span style={{ fontWeight:700, color:C.text3 }}>Developers Infotech Pvt Ltd</span>
+            </a>
+          </div>
+
         </div>
       </div>
     </>
