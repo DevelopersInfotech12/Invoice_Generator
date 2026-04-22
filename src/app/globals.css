@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ── Invoice Generator Tokens ── */
+:root {
+  --inv-font:          'Inter', system-ui, sans-serif;
+  --inv-blue:          #2563EB;
+  --inv-blue-dark:     #1D4ED8;
+  --inv-blue-light:    #EFF6FF;
+  --inv-navy:          #0F172A;
+  --inv-navy-mid:      #1E293B;
+  --inv-white:         #FFFFFF;
+  --inv-surface:       #F8FAFC;
+  --inv-surface-2:     #F1F5F9;
+  --inv-border:        #E2E8F0;
+  --inv-border-dark:   #CBD5E1;
+  --inv-text-1:        #0F172A;
+  --inv-text-2:        #334155;
+  --inv-text-3:        #64748B;
+  --inv-text-hint:     #94A3B8;
+  --inv-green:         #059669;
+  --inv-green-light:   #ECFDF5;
+  --inv-green-border:  #A7F3D0;
+  --inv-red:           #EF4444;
+  --inv-red-light:     #FEF2F2;
+  --inv-purple:        #7C3AED;
+  --inv-purple-light:  #F5F3FF;
+  --inv-purple-border: #DDD6FE;
+  --inv-r-sm:  6px;
+  --inv-r-md:  10px;
+  --inv-r-lg:  14px;
+  --inv-r-xl:  20px;
+  --inv-shadow-sm: 0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+  --inv-shadow-md: 0 4px 16px rgba(15,23,42,0.08), 0 2px 6px rgba(15,23,42,0.05);
+  --inv-shadow-lg: 0 12px 40px rgba(15,23,42,0.10), 0 4px 12px rgba(15,23,42,0.06);
+  --inv-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Animations ── */
+@keyframes inv-fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes inv-slideDown {
+  from { opacity: 0; transform: translateY(-12px) translateX(-50%); }
+  to   { opacity: 1; transform: translateY(0)     translateX(-50%); }
+}
+@keyframes inv-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── PRINT RULES — hide everything except the invoice ── */
+@media print {
+  /* Hide navbar absolutely */
+  .inv-navbar {
+    display: none !important;
+  }
+
+  /* Hide the form UI */
+  #inv-form {
+    display: none !important;
+  }
+
+  /* Show only the print view */
+  #inv-print {
+    display: block !important;
+  }
+
+  /* Reset body margins for clean A4 output */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  body {
+    margin: 1cm !important;
+    padding: 0 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
