@@ -873,7 +873,8 @@ export default function InvoiceGenerator({ initialData = null }) {
               onMouseOver={e=>e.target.style.color=C.gold}
               onMouseOut={e=>e.target.style.color=C.text4}
             >
-              Built by <span style={{ fontWeight:700, color:C.text3 }}>Developers Infotech Pvt Ltd</span>
+              Built by <span style={{ fontWeight:700, color:C.gold }} className="text-yellow-900"
+              >Developers Infotech Pvt Ltd</span>
             </a>
           </div>
 
