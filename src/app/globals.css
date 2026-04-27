@@ -1,105 +1,120 @@
 @import "tailwindcss";
 
+/* ─────────────────────────────────────────────
+   Invoice form CSS variables
+   :root  = light mode values
+   .dark  = dark mode overrides (toggled by next-themes)
+───────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --nav-bg: #ffffff;
+  --nav-border: #e2e8f0;
+  --nav-text: #1a1008;
+
+  --main-bg: #ffffff;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --input-bg: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --inv-gold: #000000;
+
+  /* ✅ Invoice-specific tokens — light mode */
+  --inv-bg:            #fdfbfb;
+  --inv-surface:       rgb(255, 255, 255);
+  --inv-surface-focus: rgba(0, 0, 0, 0.07);
+  --inv-surface-hover: rgba(0, 0, 0, 0.05);
+  --inv-border:        rgba(0, 0, 0, 0.18);
+  --inv-text1:         #111a08;   /* main input text */
+  --inv-text2:         #242e16;   /* secondary text */
+  --inv-text3:         #203253;   /* active floating label (was too faint) */
+  --inv-text4:         #7a5050;   /* placeholder / inactive label (was near-invisible) */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ✅ Dark mode overrides — applied when next-themes adds class="dark" to <html> */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --nav-bg: rgba(14, 12, 9, 0.95);
+  --nav-border: rgba(255, 255, 255, 0.10);
+  --nav-text: #f5f2ec;
+
+  --main-bg: #111827;
+  --card-bg: #1f2937;
+  --card-border: #374151;
+  --input-bg: #1f2937;
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --inv-gold: #ffffff;
+
+  /* ✅ Invoice-specific tokens — dark mode */
+  --inv-bg:            #0E0C09;
+  --inv-surface:       rgba(255, 255, 255, 0.04);
+  --inv-surface-focus: rgba(255, 255, 255, 0.07);
+  --inv-surface-hover: rgba(255, 255, 255, 0.05);
+  --inv-border:        rgba(255, 255, 255, 0.10);
+  --inv-text1:         #F5F2EC;
+  --inv-text2:         #D4CEC5;
+  --inv-text3:         #9A9080;
+  --inv-text4:         #5A5347;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Body & html */
+html,
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* ── Invoice Generator Tokens ── */
+body {
+  font-family: var(--font-geist-sans);
+}
+
+/* Main invoice container */
+.main-invoice-container {
+  background: var(--main-bg);
+  min-height: 100vh;
+  padding-bottom: 2rem;
+}
+
+/* Cards & sections */
+.invoice-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  transition: all 0.3s ease;
+}
+
+.invoice-input {
+  background: var(--input-bg);
+  color: var(--text-primary);
+  border-color: var(--card-border);
+}
+
+/* Keep invoice print tokens */
 :root {
-  --inv-font:          'Inter', system-ui, sans-serif;
-  --inv-blue:          #2563EB;
-  --inv-blue-dark:     #1D4ED8;
-  --inv-blue-light:    #EFF6FF;
-  --inv-navy:          #0F172A;
-  --inv-navy-mid:      #1E293B;
-  --inv-white:         #FFFFFF;
-  --inv-surface:       #F8FAFC;
-  --inv-surface-2:     #F1F5F9;
-  --inv-border:        #E2E8F0;
-  --inv-border-dark:   #CBD5E1;
-  --inv-text-1:        #0F172A;
-  --inv-text-2:        #334155;
-  --inv-text-3:        #64748B;
-  --inv-text-hint:     #94A3B8;
-  --inv-green:         #059669;
-  --inv-green-light:   #ECFDF5;
-  --inv-green-border:  #A7F3D0;
-  --inv-red:           #EF4444;
-  --inv-red-light:     #FEF2F2;
-  --inv-purple:        #7C3AED;
-  --inv-purple-light:  #F5F3FF;
-  --inv-purple-border: #DDD6FE;
-  --inv-r-sm:  6px;
-  --inv-r-md:  10px;
-  --inv-r-lg:  14px;
-  --inv-r-xl:  20px;
-  --inv-shadow-sm: 0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
-  --inv-shadow-md: 0 4px 16px rgba(15,23,42,0.08), 0 2px 6px rgba(15,23,42,0.05);
-  --inv-shadow-lg: 0 12px 40px rgba(15,23,42,0.10), 0 4px 12px rgba(15,23,42,0.06);
-  --inv-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --inv-font: 'Inter', system-ui, sans-serif;
+  --inv-blue: #2563EB;
 }
 
-/* ── Animations ── */
-@keyframes inv-fadeUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes inv-slideDown {
-  from { opacity: 0; transform: translateY(-12px) translateX(-50%); }
-  to   { opacity: 1; transform: translateY(0)     translateX(-50%); }
-}
-@keyframes inv-spin {
-  to { transform: rotate(360deg); }
-}
-
-/* ── PRINT RULES — hide everything except the invoice ── */
+/* Print — force original look for PDF */
 @media print {
-  /* Hide navbar absolutely */
+  .main-invoice-container,
+  body {
+    background: #ffffff !important;
+    color: #000 !important;
+  }
+
   .inv-navbar {
     display: none !important;
   }
 
-  /* Hide the form UI */
   #inv-form {
     display: none !important;
   }
 
-  /* Show only the print view */
   #inv-print {
     display: block !important;
-  }
-
-  /* Reset body margins for clean A4 output */
-  @page {
-    size: A4;
-    margin: 0;
-  }
-
-  body {
-    margin: 1cm !important;
-    padding: 0 !important;
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
   }
 }
