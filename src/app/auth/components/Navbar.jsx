@@ -26,7 +26,7 @@ export default function Navbar() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 640);
+    const check = () => setIsMobile(window.innerWidth < 400);
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
@@ -42,188 +42,137 @@ export default function Navbar() {
     : "?";
 
   return (
-    <>
-      <style>{`
-        @keyframes fadeIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
-        .nav-logout:hover { background:rgba(248,113,113,.12)!important; color:#F87171!important; border-color:rgba(248,113,113,.3)!important; }
-        .nav-link:hover   { color:#E8C97A!important; }
-
-        @media print {
-          .inv-navbar { display:none !important; }
-        }
-      `}</style>
-
-      <nav
-        className="inv-navbar"
+    <nav
+      style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 100,
+        background: "var(--nav-bg)",
+        backdropFilter: "blur(12px)",
+        borderBottom: "1px solid var(--nav-border)",
+        padding: "0 10px",
+        marginTop: "10px",
+      }}
+    >
+      <div
         style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 100,
-          background: "var(--nav-bg)",
-          backdropFilter: "blur(12px)",
-          borderBottom: `1px solid var(--nav-border)`,
-          padding: "0 16px",
-          marginTop: "10px", // ✅ added margin top
-          fontFamily: "'DM Sans',sans-serif",
-          color: "var(--nav-text)",
-          transition: "background 0.3s ease, border-color 0.3s ease",
-        }}
-      >
-        <div style={{
           maxWidth: 1160,
           margin: "0 auto",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          flexWrap: "wrap", // ✅ fix responsiveness
-          gap: 10,
-          minHeight: 62,
-        }}>
-
-          {/* Logo */}
-          <Link href="/" style={{
-            textDecoration: "none",
+          gap: 6,
+          minHeight: 60,
+          overflow: "hidden", // ✅ prevents breaking
+        }}
+      >
+        {/* Logo */}
+        <Link
+          href="/"
+          style={{
             display: "flex",
             alignItems: "center",
-            gap: 10,
-            minWidth: 0 // ✅ prevents overflow
-          }}>
-            <div style={{
-              width: 34,
-              height: 34,
-              borderRadius: 10,
-              flexShrink: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}>
-              <img
-                src="/logonew.png"
-                alt="Invoice Wallah"
-                style={{ width: 32, height: 32, objectFit: "contain" }}
-              />
-            </div>
+            gap: 6,
+            minWidth: 0,
+            flexShrink: 1,
+          }}
+        >
+          <img
+            src="/logonew.png"
+            alt="logo"
+            style={{ width: 28, height: 28 }}
+          />
 
-            <span
+          <span
+            style={{
+              fontSize: isMobile ? 16 : 22,
+              fontWeight: 900,
+              color: "#E8C97A",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis", // ✅ prevents overflow
+            }}
+          >
+            Invoice Wallah
+          </span>
+        </Link>
+
+        {/* Right Side */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: isMobile ? 4 : 8,
+            flexShrink: 0,
+          }}
+        >
+          <ThemeToggle />
+
+          {user ? (
+            <button
+              onClick={() => setMenuOpen(o => !o)}
               style={{
-                fontSize: isMobile ? 20 : 26, // ✅ smaller on mobile
-                fontWeight: 900,
-                color: "#E8C97A",
-                fontFamily: "'DM Serif Display', serif",
-                whiteSpace: "nowrap", // ✅ prevents breaking
-                
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "4px 8px",
+                borderRadius: 10,
+                background: C.goldBg,
+                border: `1px solid ${C.goldBdr}`,
               }}
             >
-              Invoice Wallah
-            </span>
-          </Link>
-
-          {/* Right side */}
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            gap: isMobile ? 6 : 12,
-            flexWrap: "wrap" // ✅ fix overflow
-          }}>
-
-            <ThemeToggle />
-
-            {user ? (
-              <div style={{ position: "relative" }}>
-                <button
-                  onClick={() => setMenuOpen(o => !o)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    background: C.goldBg,
-                    border: `1px solid ${C.goldBdr}`,
-                    borderRadius: 12,
-                    padding: "6px 10px",
-                    cursor: "pointer",
-                  }}
-                >
-                  <div style={{
-                    width: 26,
-                    height: 26,
-                    borderRadius: "50%",
-                    background: "linear-gradient(135deg,#E8C97A,#B8913A)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 10,
-                    fontWeight: 800,
-                    color: "#1A1008",
-                  }}>
-                    {initials}
-                  </div>
-
-                  {!isMobile && ( // ✅ hide name on mobile
-                    <span style={{ fontSize: 12, fontWeight: 600, color: C.text1 }}>
-                      {user.name?.split(" ")[0]}
-                    </span>
-                  )}
-                </button>
-
-                {menuOpen && (
-                  <div style={{
-                    position: "absolute",
-                    top: "calc(100% + 10px)",
-                    right: 0,
-                    minWidth: 200,
-                    background: "#1A1610",
-                    border: `1px solid ${C.border}`,
-                    borderRadius: 14,
-                    overflow: "hidden",
-                    boxShadow: "0 12px 40px rgba(0,0,0,.65)",
-                    animation: "fadeIn .2s ease both",
-                  }}>
-                    <button
-                      onClick={handleLogout}
-                      style={{
-                        width: "100%",
-                        padding: "10px",
-                        background: "none",
-                        border: "none",
-                        color: C.text2,
-                        cursor: "pointer",
-                      }}
-                    >
-                      Sign out
-                    </button>
-                  </div>
-                )}
+              <div
+                style={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: "50%",
+                  background: "linear-gradient(135deg,#E8C97A,#B8913A)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 9,
+                  fontWeight: 800,
+                }}
+              >
+                {initials}
               </div>
-            ) : (
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                <Link href="/login" style={{
-                  padding: "6px 10px",
-                  borderRadius: 8,
-                  textDecoration: "none",
-                  border: `1px solid ${C.border}`,
-                  color: "#70655c",
-                  fontSize: 11,
-                  fontWeight: "700", // ✅ added
-                }}>
-                  Sign In
-                </Link>
 
-                <Link href="/register" style={{
-                  padding: "6px 10px",
-                  borderRadius: 8,
-                  textDecoration: "none",
+              {!isMobile && (
+                <span style={{ fontSize: 11 }}>{user.name?.split(" ")[0]}</span>
+              )}
+            </button>
+          ) : (
+            <div style={{ display: "flex", gap: 4 }}>
+              <Link
+                href="/login"
+                style={{
+                  padding: "4px 8px",
+                  fontSize: 10,
+                  border: `1px solid ${C.border}`,
+                  borderRadius: 6,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Sign In
+              </Link>
+
+              <Link
+                href="/register"
+                style={{
+                  padding: "4px 8px",
+                  fontSize: 10,
+                  borderRadius: 6,
                   background: "linear-gradient(135deg,#E8C97A,#B8913A)",
                   color: "#1A1008",
-                  fontSize: 11,
-                  fontWeight: 700,
-                }}>
-                  Get Started
-                </Link>
-              </div>
-            )}
-          </div>
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Get Started
+              </Link>
+            </div>
+          )}
         </div>
-      </nav>
-    </>
+      </div>
+    </nav>
   );
 }
