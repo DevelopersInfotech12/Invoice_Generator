@@ -26,7 +26,7 @@ export default function Navbar() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 400);
+    const check = () => setIsMobile(window.innerWidth < 480); // ✅ improved breakpoint
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
@@ -63,50 +63,54 @@ export default function Navbar() {
           justifyContent: "space-between",
           gap: 6,
           minHeight: 60,
-          overflow: "hidden", // ✅ prevents breaking
         }}
       >
-        {/* Logo */}
+        {/* ✅ Logo (fixed priority) */}
         <Link
           href="/"
           style={{
             display: "flex",
             alignItems: "center",
             gap: 6,
+            flex: 1,          // ✅ take space
+            flexShrink: 0,    // ✅ prevent shrinking
             minWidth: 0,
-            flexShrink: 1,
           }}
         >
           <img
             src="/logonew.png"
             alt="logo"
-            style={{ width: 28, height: 28 }}
+            style={{
+              width: isMobile ? 24 : 28,
+              height: isMobile ? 24 : 28,
+            }}
           />
 
           <span
             style={{
-              fontSize: isMobile ? 16 : 22,
+              fontSize: isMobile ? 15 : 22,
               fontWeight: 900,
               color: "#E8C97A",
               whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis", // ✅ prevents overflow
             }}
           >
             Invoice Wallah
           </span>
         </Link>
 
-        {/* Right Side */}
+        {/* ✅ Right Side */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: isMobile ? 4 : 8,
+            gap: isMobile ? 2 : 8,
             flexShrink: 0,
           }}
         >
-          <ThemeToggle />
+          {/* ✅ Smaller toggle on mobile */}
+          <div style={{ transform: isMobile ? "scale(0.8)" : "scale(1)" }}>
+            <ThemeToggle />
+          </div>
 
           {user ? (
             <button
@@ -115,7 +119,7 @@ export default function Navbar() {
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
-                padding: "4px 8px",
+                padding: isMobile ? "3px 6px" : "4px 8px",
                 borderRadius: 10,
                 background: C.goldBg,
                 border: `1px solid ${C.goldBdr}`,
@@ -123,8 +127,8 @@ export default function Navbar() {
             >
               <div
                 style={{
-                  width: 22,
-                  height: 22,
+                  width: isMobile ? 20 : 22,
+                  height: isMobile ? 20 : 22,
                   borderRadius: "50%",
                   background: "linear-gradient(135deg,#E8C97A,#B8913A)",
                   display: "flex",
@@ -138,7 +142,9 @@ export default function Navbar() {
               </div>
 
               {!isMobile && (
-                <span style={{ fontSize: 11 }}>{user.name?.split(" ")[0]}</span>
+                <span style={{ fontSize: 11 }}>
+                  {user.name?.split(" ")[0]}
+                </span>
               )}
             </button>
           ) : (
@@ -146,8 +152,8 @@ export default function Navbar() {
               <Link
                 href="/login"
                 style={{
-                  padding: "4px 8px",
-                  fontSize: 10,
+                  padding: isMobile ? "3px 6px" : "4px 8px",
+                  fontSize: isMobile ? 9 : 10,
                   border: `1px solid ${C.border}`,
                   borderRadius: 6,
                   whiteSpace: "nowrap",
@@ -159,8 +165,8 @@ export default function Navbar() {
               <Link
                 href="/register"
                 style={{
-                  padding: "4px 8px",
-                  fontSize: 10,
+                  padding: isMobile ? "3px 6px" : "4px 8px",
+                  fontSize: isMobile ? 9 : 10,
                   borderRadius: 6,
                   background: "linear-gradient(135deg,#E8C97A,#B8913A)",
                   color: "#1A1008",

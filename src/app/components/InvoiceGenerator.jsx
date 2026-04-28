@@ -368,13 +368,19 @@ export default function InvoiceGenerator({ initialData = null }) {
     });
   };
 
-  /* ─── cell input style for table ─── */
+  /* ─── FIX: cell input base style — generous padding, fixed min-height ─── */
   const cellInput = (extra = {}) => ({
-    width: "100%", boxSizing: "border-box",
-    background: T.surface, border: `1px solid transparent`,
-    borderRadius: 4, padding: "7px 8px",
-    fontSize: 13, color: T.text1,
-    fontFamily: "inherit", outline: "none",
+    width: "100%",
+    boxSizing: "border-box",
+    background: T.surface,
+    border: `1px solid transparent`,
+    borderRadius: 4,
+    padding: "10px 12px",
+    minHeight: 40,
+    fontSize: 13.5,
+    color: T.text1,
+    fontFamily: "inherit",
+    outline: "none",
     transition: "border-color .15s, box-shadow .15s",
     ...extra,
   });
@@ -401,6 +407,26 @@ export default function InvoiceGenerator({ initialData = null }) {
         .inv-del:hover { color: ${T.danger} !important; background: rgba(220,38,38,0.08) !important; }
         .inv-add-row:hover { background: ${T.accentLt} !important; border-color: ${T.accentBd} !important; color: ${T.accent} !important; }
 
+        /* ── FIX: line items table wrapper scrolls horizontally on small screens ── */
+        .inv-items-scroll {
+          width: 100%;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+        /* ── FIX: enforce a minimum total table width so columns never crush ── */
+        .inv-items-table {
+          min-width: 820px;
+          width: 100%;
+        }
+        /* ── FIX: header and row both use same fixed pixel-based column widths ── */
+        .inv-item-cols {
+          display: grid;
+          /* Description | HSN | Qty | Rate | Unit | Amount | Del */
+          grid-template-columns: minmax(180px,3fr) 110px 90px 130px 80px 130px 36px;
+          gap: 8px;
+          align-items: center;
+        }
+
         input[type=date]::-webkit-calendar-picker-indicator { cursor:pointer; opacity:.5; }
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
@@ -412,8 +438,6 @@ export default function InvoiceGenerator({ initialData = null }) {
           .inv-hdr { flex-direction:column !important; }
           .inv-hdr-actions { width:100% !important; flex-wrap:wrap; }
           .inv-grid-3 { grid-template-columns: 1fr 1fr !important; }
-          .inv-item-grid { grid-template-columns: 1fr 1fr !important; }
-          .inv-item-grid .desc-col { grid-column: 1/-1 !important; }
         }
         @media print {
           @page { size:A4; margin:0; }
@@ -483,18 +507,12 @@ export default function InvoiceGenerator({ initialData = null }) {
             animation: "inv-fadeup .35s ease both",
           }}>
             <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }} className="text-linear-gradient(135deg,#E8C97A,#B8913A)">
-                <h1
-                  style={{
-                    margin: 0,
-                    fontSize: 22,
-                    fontWeight: 700,
-                    letterSpacing: "-.01em",
-                    background: "linear-gradient(135deg, #E8C97A, #B8913A)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}
-                >
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <h1 style={{
+                  margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "-.01em",
+                  background: "linear-gradient(135deg, #E8C97A, #B8913A)",
+                  WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                }}>
                   {editingId ? "Edit Invoice" : "New Invoice"}
                 </h1>
                 <Badge color={isProforma ? "#D97706" : T.accent}>
@@ -507,7 +525,6 @@ export default function InvoiceGenerator({ initialData = null }) {
             </div>
 
             <div className="inv-hdr-actions" style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              {/* My Invoices */}
               <a href="/invoices" className="inv-btn-ghost" style={{
                 display: "inline-flex", alignItems: "center", gap: 6,
                 padding: "8px 14px", borderRadius: 6,
@@ -539,8 +556,8 @@ export default function InvoiceGenerator({ initialData = null }) {
                 </button>
               )}
 
-              {/* Proforma toggle */}
-              <button onClick={() => { setIsProforma(p => !p); showToast(isProforma ? "Switched to Tax Invoice" : "Switched to Proforma"); }}
+              <button
+                onClick={() => { setIsProforma(p => !p); showToast(isProforma ? "Switched to Tax Invoice" : "Switched to Proforma"); }}
                 className="inv-btn-ghost"
                 style={{
                   padding: "8px 14px", borderRadius: 6,
@@ -553,7 +570,6 @@ export default function InvoiceGenerator({ initialData = null }) {
                 ⇄ {isProforma ? "Switch to Tax" : "Proforma"}
               </button>
 
-              {/* Save */}
               <button onClick={handleSave} disabled={isSaving} style={{
                 display: "inline-flex", alignItems: "center", gap: 6,
                 padding: "8px 16px", borderRadius: 6,
@@ -571,7 +587,6 @@ export default function InvoiceGenerator({ initialData = null }) {
                 </>}
               </button>
 
-              {/* Print */}
               <button onClick={handlePrint} disabled={isPrinting} style={{
                 display: "inline-flex", alignItems: "center", gap: 6,
                 padding: "8px 16px", borderRadius: 6,
@@ -672,85 +687,123 @@ export default function InvoiceGenerator({ initialData = null }) {
               </button>
             </div>
 
-            {/* Table header */}
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "3fr 1.1fr .85fr 1.5fr .75fr 1.2fr 32px",
-              gap: 8, marginBottom: 6, padding: "0 8px",
-            }}>
-              {["Description", "HSN / SAC", "Qty", "Rate (₹)", "Unit", "Amount (₹)", ""].map((h, i) => (
-                <span key={i} style={{
-                  fontSize: 10, fontWeight: 700, color: T.text4,
-                  textTransform: "uppercase", letterSpacing: ".08em",
-                  textAlign: i >= 3 && i <= 5 ? "right" : "left",
-                }}>{h}</span>
-              ))}
-            </div>
+            {/* ── FIX: wrap table in a scrollable container ── */}
+            <div className="inv-items-scroll">
+              <div className="inv-items-table">
 
-            {/* Divider */}
-            <div style={{ height: 1, background: T.border, marginBottom: 6 }} />
-
-            {/* Rows */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              {inv.items.map((item, idx) => (
-                <div key={idx} className="inv-row" style={{
-                  display: "grid",
-                  gridTemplateColumns: "3fr 1.1fr .85fr 1.5fr .75fr 1.2fr 32px",
-                  gap: 8, alignItems: "center", padding: "4px 6px", borderRadius: 5,
-                  transition: "background .12s",
-                  animation: `inv-fadeup .22s ease ${idx * .04}s both`,
-                }}>
-                  <input className="inv-cell-input" value={item.description}
-                    placeholder="Item description"
-                    onChange={e => updateItem(idx, "description", e.target.value)}
-                    style={cellInput()} />
-                  <input className="inv-cell-input" value={item.hsn}
-                    placeholder="HSN"
-                    onChange={e => updateItem(idx, "hsn", e.target.value)}
-                    style={cellInput({ textAlign: "center" })} />
-                  <input className="inv-cell-input" type="number" value={item.quantity}
-                    onChange={e => updateItem(idx, "quantity", parseFloat(e.target.value) || 0)}
-                    style={cellInput({ textAlign: "center" })} />
-                  <input className="inv-cell-input" type="number" value={item.rate}
-                    onChange={e => updateItem(idx, "rate", parseFloat(e.target.value) || 0)}
-                    style={cellInput({ textAlign: "right" })} />
-                  <input className="inv-cell-input" value={item.per}
-                    onChange={e => updateItem(idx, "per", e.target.value)}
-                    style={cellInput({ textAlign: "center" })} />
-                  <div style={{
-                    textAlign: "right", fontSize: 13.5, fontWeight: 600,
-                    color: T.text1, fontVariantNumeric: "tabular-nums", paddingRight: 4,
-                  }}>
-                    <AnimNum value={item.amount} />
-                  </div>
-                  {inv.items.length > 1
-                    ? <button className="inv-del"
-                      onClick={() => set({ items: inv.items.filter((_, i) => i !== idx) })}
-                      style={{
-                        width: 28, height: 28, display: "flex",
-                        alignItems: "center", justifyContent: "center",
-                        borderRadius: 4, border: "none",
-                        background: "transparent", color: T.text4,
-                        cursor: "pointer", fontSize: 14, transition: "all .12s",
-                      }}>✕</button>
-                    : <div />
-                  }
+                {/* Table header */}
+                <div className="inv-item-cols" style={{ marginBottom: 6, padding: "0 6px" }}>
+                  {[
+                    { label: "Description", align: "left" },
+                    { label: "HSN / SAC", align: "center" },
+                    { label: "Qty", align: "center" },
+                    { label: "Rate (₹)", align: "right" },
+                    { label: "Unit", align: "center" },
+                    { label: "Amount (₹)", align: "right" },
+                    { label: "", align: "left" },
+                  ].map((h, i) => (
+                    <span key={i} style={{
+                      fontSize: 10, fontWeight: 700, color: T.text4,
+                      textTransform: "uppercase", letterSpacing: ".08em",
+                      textAlign: h.align,
+                    }}>{h.label}</span>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            {/* Subtotal row */}
-            <div style={{
-              display: "flex", justifyContent: "flex-end", alignItems: "center",
-              gap: 20, marginTop: 10, padding: "10px 8px 0",
-              borderTop: `1px solid ${T.border}`,
-            }}>
-              <span style={{ fontSize: 13, color: T.text3, fontWeight: 500 }}>Subtotal</span>
-              <span style={{ fontSize: 15, fontWeight: 700, color: T.text1, fontVariantNumeric: "tabular-nums", minWidth: 110, textAlign: "right" }}>
-                <AnimNum value={subtotal} />
-              </span>
-              <div style={{ width: 32 }} />
-            </div>
+                {/* Divider */}
+                <div style={{ height: 1, background: T.border, marginBottom: 6 }} />
+
+                {/* Rows */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  {inv.items.map((item, idx) => (
+                    <div key={idx} className="inv-row inv-item-cols" style={{
+                      padding: "4px 4px",
+                      borderRadius: 5,
+                      transition: "background .12s",
+                      animation: `inv-fadeup .22s ease ${idx * .04}s both`,
+                    }}>
+                      {/* Description */}
+                      <input
+                        className="inv-cell-input"
+                        value={item.description}
+                        placeholder="Item description"
+                        onChange={e => updateItem(idx, "description", e.target.value)}
+                        style={cellInput()}
+                      />
+                      {/* HSN */}
+                      <input
+                        className="inv-cell-input"
+                        value={item.hsn}
+                        placeholder="HSN"
+                        onChange={e => updateItem(idx, "hsn", e.target.value)}
+                        style={cellInput({ textAlign: "center" })}
+                      />
+                      {/* Quantity */}
+                      <input
+                        className="inv-cell-input"
+                        type="number"
+                        value={item.quantity}
+                        onChange={e => updateItem(idx, "quantity", parseFloat(e.target.value) || 0)}
+                        style={cellInput({ textAlign: "center" })}
+                      />
+                      {/* Rate */}
+                      <input
+                        className="inv-cell-input"
+                        type="number"
+                        value={item.rate}
+                        onChange={e => updateItem(idx, "rate", parseFloat(e.target.value) || 0)}
+                        style={cellInput({ textAlign: "right" })}
+                      />
+                      {/* Unit */}
+                      <input
+                        className="inv-cell-input"
+                        value={item.per}
+                        onChange={e => updateItem(idx, "per", e.target.value)}
+                        style={cellInput({ textAlign: "center" })}
+                      />
+                      {/* Amount (read-only display) */}
+                      <div style={{
+                        textAlign: "right", fontSize: 13.5, fontWeight: 600,
+                        color: T.text1, fontVariantNumeric: "tabular-nums",
+                        padding: "10px 4px",
+                      }}>
+                        <AnimNum value={item.amount} />
+                      </div>
+                      {/* Delete */}
+                      {inv.items.length > 1
+                        ? (
+                          <button className="inv-del"
+                            onClick={() => set({ items: inv.items.filter((_, i) => i !== idx) })}
+                            style={{
+                              width: 32, height: 32, display: "flex",
+                              alignItems: "center", justifyContent: "center",
+                              borderRadius: 4, border: "none",
+                              background: "transparent", color: T.text4,
+                              cursor: "pointer", fontSize: 14, transition: "all .12s",
+                              flexShrink: 0,
+                            }}>✕</button>
+                        )
+                        : <div />
+                      }
+                    </div>
+                  ))}
+                </div>
+
+                {/* Subtotal row */}
+                <div style={{
+                  display: "flex", justifyContent: "flex-end", alignItems: "center",
+                  gap: 20, marginTop: 10, padding: "10px 8px 0",
+                  borderTop: `1px solid ${T.border}`,
+                }}>
+                  <span style={{ fontSize: 13, color: T.text3, fontWeight: 500 }}>Subtotal</span>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: T.text1, fontVariantNumeric: "tabular-nums", minWidth: 110, textAlign: "right" }}>
+                    <AnimNum value={subtotal} />
+                  </span>
+                  <div style={{ width: 36 }} />
+                </div>
+
+              </div>{/* /inv-items-table */}
+            </div>{/* /inv-items-scroll */}
           </Card>
 
           {/* ── NOTES + SUMMARY ── */}
@@ -762,7 +815,6 @@ export default function InvoiceGenerator({ initialData = null }) {
             <Card>
               <SectionLabel>Tax Summary</SectionLabel>
               <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-                {/* Tax type + rate */}
                 <div style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between",
                   padding: "10px 0", borderBottom: `1px solid ${T.border}`,
