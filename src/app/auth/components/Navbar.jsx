@@ -103,7 +103,8 @@ export default function Navbar() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: isMobile ? 0 : 8,
+            // gap: isMobile ? 0 : 8,
+            gap: isMobile ? 6 : 8,
             flexShrink: 0,
           }}
         >
@@ -149,18 +150,22 @@ export default function Navbar() {
             </button>
           ) : (
             <div style={{ display: "flex", gap: 4 }}>
-              <Link
-                href="/login"
-                style={{
-                  padding: isMobile ? "3px 6px" : "4px 8px",
-                  fontSize: isMobile ? 9 : 10,
-                  border: `1px solid ${C.border}`,
-                  borderRadius: 6,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {/* Sign In */}
-              </Link>
+
+              {!isMobile && (
+                <Link
+                  href="/login"
+                  style={{
+                    padding: "4px 8px",
+                    fontSize: 10,
+                    border: `1px solid ${C.border}`,
+                    borderRadius: 6,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Sign In
+                </Link>
+              )}
+
 
               <Link
                 href="/register"

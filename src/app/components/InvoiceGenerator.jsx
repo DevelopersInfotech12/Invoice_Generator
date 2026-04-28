@@ -265,19 +265,20 @@ function PartySection({ title, gstin, onGstinChange, onFetch, loading, error, fi
 
 /* ══════════════════════════════════════════════════════════════════
    ScrollShadow — gradient fade on left/right edges of overflowing
-   table. Light fade in light mode, dark fade in dark mode.
-   Thin scrollbar always visible as scroll affordance.
+   table. Shows a scroll hint below that disappears once user scrolls.
 ══════════════════════════════════════════════════════════════════ */
 function ScrollShadow({ children }) {
   const scrollRef = useRef(null);
-  const [showLeft,  setShowLeft]  = useState(false);
-  const [showRight, setShowRight] = useState(false);
+  const [showLeft,    setShowLeft]    = useState(false);
+  const [showRight,   setShowRight]   = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
 
   const update = () => {
     const el = scrollRef.current;
     if (!el) return;
     setShowLeft(el.scrollLeft > 4);
     setShowRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+    if (el.scrollLeft > 4) setHasScrolled(true);
   };
 
   useEffect(() => {
@@ -316,6 +317,35 @@ function ScrollShadow({ children }) {
         <div style={{ minWidth: 820 }}>{children}</div>
       </div>
       <div style={fade("right")} />
+
+      {/* ── Scroll hint disclaimer — disappears once user scrolls ── */}
+      {!hasScrolled && showRight && (
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 5,
+          marginTop: 7,
+          pointerEvents: "none",
+        }}>
+          <span style={{
+            fontSize: 11,
+            color: "var(--inv-text4)",
+            fontStyle: "italic",
+            letterSpacing: ".01em",
+          }}>
+            ← Scroll to see more columns
+          </span>
+          <span style={{ display: "inline-flex", gap: 3, alignItems: "center" }}>
+            {[0, 1, 2].map(i => (
+              <span key={i} style={{
+                width: 3, height: 3, borderRadius: "50%",
+                background: "var(--inv-text4)",
+                animation: `inv-dot-bounce .9s ease ${i * 0.18}s infinite`,
+              }} />
+            ))}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
@@ -443,6 +473,10 @@ export default function InvoiceGenerator({ initialData = null }) {
         @keyframes inv-spin      { to { transform:rotate(360deg); } }
         @keyframes inv-fadeup    { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
         @keyframes inv-slidedown { from { opacity:0; transform:translateY(-8px) translateX(-50%); } to { opacity:1; transform:translateY(0) translateX(-50%); } }
+        @keyframes inv-dot-bounce {
+          0%, 80%, 100% { transform:translateY(0); opacity:.4; }
+          40%           { transform:translateY(-3px); opacity:1; }
+        }
 
         .inv-cell-input:focus { border-color:${T.accent} !important; box-shadow:0 0 0 2px ${T.accentLt} !important; }
         .inv-row:hover       { background:var(--inv-surface-hover) !important; }
@@ -456,7 +490,6 @@ export default function InvoiceGenerator({ initialData = null }) {
           gap:8px; align-items:center;
         }
 
-        /* Thin scrollbar inside ScrollShadow */
         .inv-scroll-area::-webkit-scrollbar       { height:5px; }
         .inv-scroll-area::-webkit-scrollbar-track { background:transparent; }
         .inv-scroll-area::-webkit-scrollbar-thumb { background:var(--inv-border,#cbd5e1); border-radius:99px; }
@@ -480,15 +513,6 @@ export default function InvoiceGenerator({ initialData = null }) {
           #inv-print { display:block !important; }
         }
 
-        /* ══════════════════════════════════════════════════════════
-           NAVBAR FIX — +1 px bump (13 → 14px), tight gaps so
-           brand + toggle + Sign In + Get Started stay on ONE line.
-           Key changes vs previous attempt:
-             • font-size 14px (not 14.5 — avoids overlap)
-             • gap between nav items tightened to 4–6px
-             • horizontal padding on links/buttons: 8px (not 10–14px)
-             • white-space:nowrap on every item
-        ══════════════════════════════════════════════════════════ */
         nav a, nav button,
         header a, header button,
         [class*="navbar"] a, [class*="navbar"] button,
@@ -498,13 +522,11 @@ export default function InvoiceGenerator({ initialData = null }) {
           padding-left:  8px !important;
           padding-right: 8px !important;
         }
-        /* Brand / logo — same 14px, no bigger so it doesn't crowd siblings */
         [class*="brand"], [class*="logo"],
         nav h1, header h1 {
           font-size:   14px !important;
           white-space: nowrap !important;
         }
-        /* Tighten the flex gap between nav children */
         nav, header,
         [class*="navbar"],
         [class*="nav-wrap"], [class*="nav-inner"] {
