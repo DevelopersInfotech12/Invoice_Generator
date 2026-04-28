@@ -527,25 +527,25 @@ export default function InvoiceGenerator({ initialData = null }) {
           #inv-print { display:block !important; }
         }
 
-        nav a, nav button,
-        header a, header button,
-        [class*="navbar"] a, [class*="navbar"] button,
-        [class*="nav-"] a,  [class*="nav-"] button {
-          font-size:     14px !important;
-          white-space:   nowrap !important;
-          padding-left:  8px !important;
-          padding-right: 8px !important;
-        }
-        [class*="brand"], [class*="logo"],
-        nav h1, header h1 {
-          font-size:   14px !important;
-          white-space: nowrap !important;
-        }
-        nav, header,
-        [class*="navbar"],
-        [class*="nav-wrap"], [class*="nav-inner"] {
-          gap: 4px !important;
-        }
+      nav a, nav button,
+header a, header button,
+[class*="navbar"] a, [class*="navbar"] button,
+[class*="nav-"] a,  [class*="nav-"] button {
+  font-size:     14px !important;
+  white-space:   nowrap !important;
+  padding-left:  8px !important;
+  padding-right: 8px !important;
+}
+[class*="brand"], [class*="logo"],
+nav h1, header h1 {
+  font-size:   14px !important;
+  white-space: nowrap !important;
+}
+nav, header,
+[class*="navbar"],
+[class*="nav-wrap"], [class*="nav-inner"] {
+  gap: 4px !important;
+}
       `}</style>
 
       <Toast toast={toast} />

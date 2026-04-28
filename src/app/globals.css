@@ -6,7 +6,7 @@
    .dark  = dark mode overrides (toggled by next-themes)
 ───────────────────────────────────────────── */
 :root {
-  --background: #f8fafc;
+  --background: #ffffff;
   --foreground: #0f172a;
   --nav-bg: #ffffff;
   --nav-border: #e2e8f0;
@@ -21,18 +21,18 @@
   --inv-gold: #000000;
 
   /* ✅ Invoice-specific tokens — light mode */
-  --inv-bg:            #fdfbfb;
-  --inv-surface:       rgb(255, 255, 255);
+  --inv-bg:            #ffffff;
+  --inv-surface:       #ffffff;
   --inv-surface-focus: rgba(0, 0, 0, 0.07);
   --inv-surface-hover: rgba(0, 0, 0, 0.05);
   --inv-border:        rgba(0, 0, 0, 0.18);
-  --inv-text1:         #111a08;   /* main input text */
-  --inv-text2:         #242e16;   /* secondary text */
-  --inv-text3:         #203253;   /* active floating label (was too faint) */
-  --inv-text4:         #7a5050;   /* placeholder / inactive label (was near-invisible) */
+  --inv-text1:         #111a08;
+  --inv-text2:         #242e16;
+  --inv-text3:         #203253;
+  --inv-text4:         #7a5050;
 }
 
-/* ✅ Dark mode overrides — applied when next-themes adds class="dark" to <html> */
+/* ✅ Dark mode overrides */
 .dark {
   --background: #0a0a0a;
   --foreground: #ededed;
@@ -96,6 +96,29 @@ body {
 :root {
   --inv-font: 'Inter', system-ui, sans-serif;
   --inv-blue: #2563EB;
+}
+
+/* ── Navbar consistency across all pages ── */
+nav a, nav button,
+header a, header button,
+[class*="navbar"] a, [class*="navbar"] button,
+[class*="nav-"] a,  [class*="nav-"] button {
+  font-size:     14px !important;
+  white-space:   nowrap !important;
+  padding-left:  8px !important;
+  padding-right: 8px !important;
+}
+
+[class*="brand"], [class*="logo"],
+nav h1, header h1 {
+  font-size:   14px !important;
+  white-space: nowrap !important;
+}
+
+nav, header,
+[class*="navbar"],
+[class*="nav-wrap"], [class*="nav-inner"] {
+  gap: 4px !important;
 }
 
 /* Print — force original look for PDF */
