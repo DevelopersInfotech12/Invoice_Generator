@@ -88,7 +88,7 @@ export default function Navbar() {
 
           <span
             style={{
-              fontSize: isMobile ? 15 : 22,
+              fontSize: isMobile ? 18 : 22,
               fontWeight: 900,
               color: "#E8C97A",
               whiteSpace: "nowrap",
@@ -103,7 +103,7 @@ export default function Navbar() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: isMobile ? 2 : 8,
+            gap: isMobile ? 0 : 8,
             flexShrink: 0,
           }}
         >
@@ -159,7 +159,7 @@ export default function Navbar() {
                   whiteSpace: "nowrap",
                 }}
               >
-                Sign In
+                {/* Sign In */}
               </Link>
 
               <Link
