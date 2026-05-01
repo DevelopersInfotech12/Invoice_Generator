@@ -498,11 +498,12 @@ export default function InvoiceGenerator({ initialData = null }) {
         .inv-del:hover       { color:${T.danger} !important; background:rgba(220,38,38,0.08) !important; }
         .inv-add-row:hover   { background:${T.accentLt} !important; border-color:${T.accentBd} !important; color:${T.accent} !important; }
 
-        .inv-item-cols {
-          display:grid;
-          grid-template-columns:minmax(180px,3fr) 110px 90px 130px 80px 130px 36px;
-          gap:8px; align-items:center;
-        }
+.inv-item-cols {
+  display: grid;
+  grid-template-columns: minmax(180px,3fr) 110px 90px 130px 80px 130px 36px;
+  gap: 8px;
+  align-items: center;
+}
 
         .inv-scroll-area::-webkit-scrollbar       { height:5px; }
         .inv-scroll-area::-webkit-scrollbar-track { background:transparent; }
@@ -805,36 +806,62 @@ nav, header,
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 {inv.items.map((item, idx) => (
                   <div key={idx} className="inv-row inv-item-cols" style={{
-                    padding: "4px 4px", borderRadius: 5,
+                    padding: "4px 4px",
+                    borderRadius: 5,
                     transition: "background .12s",
-                    animation: `inv-fadeup .22s ease ${idx * .04}s both`,
                   }}>
-                    <input className="inv-cell-input" value={item.description} placeholder="Item description"
-                      onChange={e => updateItem(idx, "description", e.target.value)} style={cellInput()} />
-                    <input className="inv-cell-input" value={item.hsn} placeholder="HSN"
-                      onChange={e => updateItem(idx, "hsn", e.target.value)} style={cellInput({ textAlign: "center" })} />
-                    <input className="inv-cell-input" type="number" value={item.quantity}
-                      onChange={e => updateItem(idx, "quantity", parseFloat(e.target.value) || 0)} style={cellInput({ textAlign: "center" })} />
-                    <input className="inv-cell-input" type="number" value={item.rate}
-                      onChange={e => updateItem(idx, "rate", parseFloat(e.target.value) || 0)} style={cellInput({ textAlign: "right" })} />
-                    <input className="inv-cell-input" value={item.per}
-                      onChange={e => updateItem(idx, "per", e.target.value)} style={cellInput({ textAlign: "center" })} />
+                    <Input
+                      value={item.description}
+                      onChange={e => updateItem(idx, "description", e.target.value)}
+                    />
+
+                    <Input
+                      value={item.hsn}
+                      onChange={e => updateItem(idx, "hsn", e.target.value)}
+                    />
+
+                    <Input
+                      type="number"
+                      value={item.quantity}
+                      onChange={e => updateItem(idx, "quantity", parseFloat(e.target.value) || 0)}
+                    />
+
+                    <Input
+                      type="number"
+                      value={item.rate}
+                      onChange={e => updateItem(idx, "rate", parseFloat(e.target.value) || 0)}
+                    />
+
+                    <Input
+                      value={item.per}
+                      onChange={e => updateItem(idx, "per", e.target.value)}
+                    />
+
                     <div style={{
-                      textAlign: "right", fontSize: 13.5, fontWeight: 600,
-                      color: T.text1, fontVariantNumeric: "tabular-nums", padding: "10px 4px",
+                      textAlign: "right",
+                      fontSize: 13.5,
+                      fontWeight: 600,
+                      padding: "10px 4px",
                     }}>
                       <AnimNum value={item.amount} />
                     </div>
-                    {inv.items.length > 1
-                      ? <button className="inv-del"
+
+                    {inv.items.length > 1 ? (
+                      <button
                         onClick={() => set({ items: inv.items.filter((_, i) => i !== idx) })}
                         style={{
-                          width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center",
-                          borderRadius: 4, border: "none", background: "transparent", color: T.text4,
-                          cursor: "pointer", fontSize: 14, transition: "all .12s", flexShrink: 0,
-                        }}>✕</button>
-                      : <div />
-                    }
+                          width: 32,
+                          height: 32,
+                          border: "none",
+                          background: "transparent",
+                          cursor: "pointer",
+                        }}
+                      >
+                        ✕
+                      </button>
+                    ) : (
+                      <div />
+                    )}
                   </div>
                 ))}
               </div>
