@@ -464,6 +464,94 @@ export default function InvoiceGenerator({ initialData = null }) {
     ...extra,
   });
 
+  function CustomSelect({ label, value, onChange, options, wrapperClassName = "" }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef(null);
+
+    useEffect(() => {
+      const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+      document.addEventListener("mousedown", handler);
+      return () => document.removeEventListener("mousedown", handler);
+    }, []);
+
+    return (
+      <div
+        className={wrapperClassName}
+        style={{ display: "flex", flexDirection: "column", gap: 5 }}
+      >
+        {label && (
+          <label style={{
+            fontSize: 11, fontWeight: 600, color: T.text3,
+            textTransform: "uppercase", letterSpacing: ".06em",
+          }}>{label}</label>
+        )}
+
+        {/* ── Trigger + Dropdown scoped to this inner div only ── */}
+        <div ref={ref} style={{ position: "relative", width: "100%" }}>
+          <div
+            onClick={() => setOpen(o => !o)}
+            style={{
+              width: "100%", boxSizing: "border-box",
+              background: T.surface, border: `1px solid ${open ? T.accent : T.border}`,
+              borderRadius: 6, padding: "9px 32px 9px 11px",
+              fontSize: 13.5, color: T.text1,
+              cursor: "pointer", userSelect: "none",
+              position: "relative",
+              boxShadow: open ? `0 0 0 3px ${T.accentLt}` : "none",
+              transition: "border-color .15s, box-shadow .15s",
+            }}
+          >
+            {value || "Select type"}
+            <span style={{
+              position: "absolute", right: 10, top: "50%",
+              transform: `translateY(-50%) rotate(${open ? 180 : 0}deg)`,
+              transition: "transform .2s",
+              pointerEvents: "none",
+              fontSize: 16, color: T.text3,
+            }}>▾</span>
+          </div>
+
+          {open && (
+            <div style={{
+              position: "absolute",
+              top: "100%",
+              left: 0,
+              right: 0,
+              boxSizing: "border-box",
+              background: T.surface,
+              border: `1px solid ${T.border}`,
+              borderRadius: 6,
+              zIndex: 999,
+              marginTop: 4,
+              boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+              overflow: "hidden",
+            }}>
+              {options.map(opt => (
+                <div
+                  key={opt}
+                  onClick={() => { onChange(opt); setOpen(false); }}
+                  style={{
+                    padding: "9px 12px",
+                    fontSize: 13.5,
+                    color: opt === value ? T.accent : T.text1,
+                    background: opt === value ? T.accentLt : "transparent",
+                    cursor: "pointer",
+                    fontWeight: opt === value ? 600 : 400,
+                    transition: "background .12s",
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = opt === value ? T.accentLt : "var(--inv-surface-hover)"}
+                  onMouseLeave={e => e.currentTarget.style.background = opt === value ? T.accentLt : "transparent"}
+                >
+                  {opt}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <style>{`
@@ -981,15 +1069,38 @@ nav, header,
                 </div>
               ))}
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 2fr", gap: 14 }}>
+
+            <style>{`
+    @media (max-width: 660px) {
+      .inv-bank-bottom {
+        grid-template-columns: 1fr !important;
+      }
+      .inv-bank-actype-mobile {
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 12px !important;
+      }
+      .inv-bank-actype-mobile label {
+        white-space: nowrap !important;
+        margin-bottom: 0 !important;
+        flex-shrink: 0 !important;
+      }
+    }
+  `}</style>
+
+            <div className="inv-bank-bottom" style={{ display: "grid", gridTemplateColumns: "1fr 2fr 1fr", gap: 14 }}>
               <Input label="IFSC Code" value={inv.bank.ifsc || ""} mono
                 onChange={e => setBank("ifsc", e.target.value.toUpperCase())} />
-              <Select label="Account Type" value={inv.bank.accountType} onChange={e => setBank("accountType", e.target.value)}>
-                <option value="" disabled>Select type</option>
-                <option value="Current">Current</option>
-                <option value="Savings">Savings</option>
-              </Select>
               <Input label="Branch" value={inv.bank.branch || ""} onChange={e => setBank("branch", e.target.value)} />
+
+              {/* Custom Account Type Dropdown */}
+              <CustomSelect
+                label="Account Type"
+                value={inv.bank.accountType}
+                onChange={v => setBank("accountType", v)}
+                options={["Current", "Savings"]}
+                wrapperClassName="inv-bank-actype-mobile"
+              />
             </div>
           </Card>
 
