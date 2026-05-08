@@ -43,8 +43,8 @@ export default function RootLayout({ children }) {
         </Script>
 
         <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
+          attribute="data-theme"   // ← this line
+          defaultTheme="dark"
           enableSystem={false}
           disableTransitionOnChange
         >

@@ -1,143 +1,230 @@
 @import "tailwindcss";
 
-/* ─────────────────────────────────────────────
-   Invoice form CSS variables
-   :root  = light mode values
-   .dark  = dark mode overrides (toggled by next-themes)
-───────────────────────────────────────────── */
+/* ════════════════════════════════════════════════
+   LIGHT MODE (default)
+   ════════════════════════════════════════════════ */
 :root {
   --background: #ffffff;
-  --foreground: #0f172a;
-  --nav-bg: #ffffff;
-  --nav-border: #e2e8f0;
-  --nav-text: #1a1008;
+  --foreground: #171717;
 
-  --main-bg: #ffffff;
-  --card-bg: #ffffff;
-  --card-border: #e2e8f0;
-  --input-bg: #ffffff;
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --inv-gold: #000000;
+  /* Nav */
+  --nav-bg: rgba(255, 255, 255, 0.85);
+  --nav-border: rgba(0, 0, 0, 0.08);
 
-  /* ✅ Invoice-specific tokens — light mode */
-  --inv-bg:            #ffffff;
-  --inv-surface:       #ffffff;
-  --inv-surface-focus: rgba(0, 0, 0, 0.07);
-  --inv-surface-hover: rgba(0, 0, 0, 0.05);
-  --inv-border:        rgba(0, 0, 0, 0.18);
-  --inv-text1:         #111a08;
-  --inv-text2:         #242e16;
-  --inv-text3:         #203253;
-  --inv-text4:         #7a5050;
+  /* Invoice form surface */
+  --inv-bg: #f4f5f7;
+  --inv-surface: #ffffff;
+  --inv-surface-hover: #f0f2f5;
+  --inv-border: #e2e5ea;
+  --inv-border2: #d0d4db;
+
+  /* Invoice text */
+  --inv-text1: #111827;
+  --inv-text2: #374151;
+  --inv-text3: #6b7280;
+  --inv-text4: #9ca3af;
+
+  /* Invoice input */
+  --inv-input-bg: #ffffff;
+  --inv-input-border: #d1d5db;
+  --inv-label: #374151;
+
+  /* Invoice card */
+  --inv-card-bg: #ffffff;
+  --inv-card-border: #e5e7eb;
+  --inv-card-shadow: 0 1px 4px rgba(0,0,0,0.06);
+
+  /* Section header */
+  --inv-section-bg: #f9fafb;
+  --inv-section-border: #e5e7eb;
+  --inv-section-text: #111827;
+
+  /* Totals panel */
+  --inv-total-bg: #f9fafb;
+  --inv-total-border: #e5e7eb;
+
+  /* Accent */
+  --inv-accent: #2563eb;
+  --inv-accent-hover: #1d4ed8;
 }
 
-/* ✅ Dark mode overrides */
-.dark {
+/* Light mode — explicit selector */
+[data-theme="light"] {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  --nav-bg: rgba(255, 255, 255, 0.85);
+  --nav-border: rgba(0, 0, 0, 0.08);
+
+  --inv-bg: #f4f5f7;
+  --inv-surface: #ffffff;
+  --inv-surface-hover: #f0f2f5;
+  --inv-border: #e2e5ea;
+  --inv-border2: #d0d4db;
+
+  --inv-text1: #111827;
+  --inv-text2: #374151;
+  --inv-text3: #6b7280;
+  --inv-text4: #9ca3af;
+
+  --inv-input-bg: #ffffff;
+  --inv-input-border: #d1d5db;
+  --inv-label: #374151;
+
+  --inv-card-bg: #ffffff;
+  --inv-card-border: #e5e7eb;
+  --inv-card-shadow: 0 1px 4px rgba(0,0,0,0.06);
+
+  --inv-section-bg: #f9fafb;
+  --inv-section-border: #e5e7eb;
+  --inv-section-text: #111827;
+
+  --inv-total-bg: #f9fafb;
+  --inv-total-border: #e5e7eb;
+
+  --inv-accent: #2563eb;
+  --inv-accent-hover: #1d4ed8;
+}
+
+/* Dark mode */
+[data-theme="dark"] {
   --background: #0a0a0a;
   --foreground: #ededed;
-  --nav-bg: rgba(14, 12, 9, 0.95);
-  --nav-border: rgba(255, 255, 255, 0.10);
-  --nav-text: #f5f2ec;
 
-  --main-bg: #111827;
-  --card-bg: #1f2937;
-  --card-border: #374151;
-  --input-bg: #1f2937;
-  --text-primary: #f1f5f9;
-  --text-secondary: #cbd5e1;
-  --inv-gold: #ffffff;
+  --nav-bg: rgba(15, 15, 20, 0.85);
+  --nav-border: rgba(255, 255, 255, 0.08);
 
-  /* ✅ Invoice-specific tokens — dark mode */
-  --inv-bg:            #0E0C09;
-  --inv-surface:       rgba(255, 255, 255, 0.04);
-  --inv-surface-focus: rgba(255, 255, 255, 0.07);
-  --inv-surface-hover: rgba(255, 255, 255, 0.05);
-  --inv-border:        rgba(255, 255, 255, 0.10);
-  --inv-text1:         #F5F2EC;
-  --inv-text2:         #D4CEC5;
-  --inv-text3:         #9A9080;
-  --inv-text4:         #5A5347;
+  --inv-bg: #0f1117;
+  --inv-surface: #1a1d27;
+  --inv-surface-hover: #1f2330;
+  --inv-border: #2a2d3a;
+  --inv-border2: #333646;
+
+  --inv-text1: #f3f4f6;
+  --inv-text2: #d1d5db;
+  --inv-text3: #9ca3af;
+  --inv-text4: #6b7280;
+
+  --inv-input-bg: #1a1d27;
+  --inv-input-border: #2a2d3a;
+  --inv-label: #d1d5db;
+
+  --inv-card-bg: #1a1d27;
+  --inv-card-border: #2a2d3a;
+  --inv-card-shadow: 0 1px 4px rgba(0,0,0,0.3);
+
+  --inv-section-bg: #14161f;
+  --inv-section-border: #2a2d3a;
+  --inv-section-text: #f3f4f6;
+
+  --inv-total-bg: #14161f;
+  --inv-total-border: #2a2d3a;
+
+  --inv-accent: #3b82f6;
+  --inv-accent-hover: #2563eb;
 }
 
-/* Body & html */
-html,
+/* ════════════════════════════════════════════════
+   DARK MODE — toggled by next-themes via data-theme
+   ════════════════════════════════════════════════ */
+[data-theme="dark"] {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+
+  /* Nav */
+  --nav-bg: rgba(15, 15, 20, 0.85);
+  --nav-border: rgba(255, 255, 255, 0.08);
+
+  /* Invoice form surface */
+  --inv-bg: #0f1117;
+  --inv-surface: #1a1d27;
+  --inv-surface-hover: #1f2330;
+  --inv-border: #2a2d3a;
+  --inv-border2: #333646;
+
+  /* Invoice text */
+  --inv-text1: #f3f4f6;
+  --inv-text2: #d1d5db;
+  --inv-text3: #9ca3af;
+  --inv-text4: #6b7280;
+
+  /* Invoice input */
+  --inv-input-bg: #1a1d27;
+  --inv-input-border: #2a2d3a;
+  --inv-label: #d1d5db;
+
+  /* Invoice card */
+  --inv-card-bg: #1a1d27;
+  --inv-card-border: #2a2d3a;
+  --inv-card-shadow: 0 1px 4px rgba(0,0,0,0.3);
+
+  /* Section header */
+  --inv-section-bg: #14161f;
+  --inv-section-border: #2a2d3a;
+  --inv-section-text: #f3f4f6;
+
+  /* Totals panel */
+  --inv-total-bg: #14161f;
+  --inv-total-border: #2a2d3a;
+
+  /* Accent */
+  --inv-accent: #3b82f6;
+  --inv-accent-hover: #2563eb;
+}
+
+/* ════════════════════════════════════════════════
+   TAILWIND THEME BRIDGE
+   ════════════════════════════════════════════════ */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ════════════════════════════════════════════════
+   BASE BODY
+   ════════════════════════════════════════════════ */
 body {
   background: var(--background);
   color: var(--foreground);
-  transition: background 0.3s ease, color 0.3s ease;
+  font-family: Arial, Helvetica, sans-serif;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
-body {
-  font-family: var(--font-geist-sans);
-}
-
-/* Main invoice container */
-.main-invoice-container {
-  background: var(--main-bg);
-  min-height: 100vh;
-  padding-bottom: 2rem;
-}
-
-/* Cards & sections */
-.invoice-card {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  transition: all 0.3s ease;
-}
-
-.invoice-input {
-  background: var(--input-bg);
-  color: var(--text-primary);
-  border-color: var(--card-border);
-}
-
-/* Keep invoice print tokens */
-:root {
-  --inv-font: 'Inter', system-ui, sans-serif;
-  --inv-blue: #2563EB;
-}
-
-/* ── Navbar consistency across all pages ── */
-nav a, nav button,
-header a, header button,
-[class*="navbar"] a, [class*="navbar"] button,
-[class*="nav-"] a,  [class*="nav-"] button {
-  font-size:     14px !important;
-  white-space:   nowrap !important;
-  padding-left:  8px !important;
-  padding-right: 8px !important;
-}
-
-[class*="brand"], [class*="logo"],
-nav h1, header h1 {
-  font-size:   14px !important;
-  white-space: nowrap !important;
-}
-
-nav, header,
-[class*="navbar"],
-[class*="nav-wrap"], [class*="nav-inner"] {
-  gap: 4px !important;
-}
-
-/* Print — force original look for PDF */
+/* ════════════════════════════════════════════════
+   PRINT — hide EVERYTHING except #inv-print
+   ════════════════════════════════════════════════ */
 @media print {
-  .main-invoice-container,
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
   body {
-    background: #ffffff !important;
-    color: #000 !important;
+    margin: 1cm !important;
+    padding: 0 !important;
+    background: #fff !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 
-  .inv-navbar {
-    display: none !important;
-  }
-
-  #inv-form {
+  body > * {
     display: none !important;
   }
 
   #inv-print {
     display: block !important;
+  }
+
+  .inv-navbar,
+  nav,
+  header,
+  #inv-form,
+  [class*="navbar"],
+  [class*="nav-wrap"],
+  [class*="Navbar"],
+  footer:not(#inv-print footer) {
+    display: none !important;
   }
 }

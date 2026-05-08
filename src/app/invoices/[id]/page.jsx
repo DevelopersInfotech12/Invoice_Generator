@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation"; // ── CHANGED: added useSearchParams ──
 import AuthGuard from "../../auth/components/AuthGuard";
 import InvoiceGenerator from "../../components/InvoiceGenerator";
 import { invoiceApi } from "../../auth/api/authApi";
@@ -11,6 +11,7 @@ const C = {
 
 function EditContent() {
   const { id } = useParams();
+  const searchParams = useSearchParams(); // ── CHANGED ──
   const [invoiceData, setInvoiceData] = useState(null);
   const [loading,     setLoading]     = useState(true);
   const [error,       setError]       = useState("");
@@ -22,6 +23,17 @@ function EditContent() {
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
   }, [id]);
+
+  // ── CHANGED: Auto-trigger print/download if ?print=1 is in the URL ──
+  useEffect(() => {
+    if (!loading && invoiceData && searchParams.get("print") === "1") {
+      // Small delay to let the invoice render fully before printing
+      const timer = setTimeout(() => {
+        window.print();
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, invoiceData, searchParams]);
 
   if (loading) {
     return (
