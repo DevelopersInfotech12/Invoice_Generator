@@ -195,10 +195,10 @@ export default function InvoiceGenerator({ initialData = null }) {
 
           {/* ── Footer ── */}
           <div style={{ textAlign: "center", paddingTop: 28, paddingBottom: 4 }}>
-            <span style={{ fontSize: 12, color: "var(--inv-text4)" }}>
+            <span style={{ fontSize: 15, color: "var(--inv-text4)" }}>
               Powered by:{" "}
               <a href="https://developersinfotech.in/" target="_blank" rel="noopener noreferrer"
-                style={{ color: "var(--inv-text3)", fontWeight: 600, textDecoration: "none" }}
+                style={{ color: "#2563EB", fontWeight: 600, textDecoration: "none",  }}
                 onMouseOver={e => e.currentTarget.style.color = "#2563EB"}
                 onMouseOut={e => e.currentTarget.style.color = "var(--inv-text3)"}>
                 Invoice Wallah

@@ -1,180 +1,111 @@
 @import "tailwindcss";
 
-/* ════════════════════════════════════════════════
-   LIGHT MODE (default)
-   ════════════════════════════════════════════════ */
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ═══════════════════════════════════════════════════════
+   THEME VARIABLES
+   Applied via data-theme="dark" | data-theme="light"
+   on <html> element by ThemeProvider
+═══════════════════════════════════════════════════════ */
 
-  /* Nav */
-  --nav-bg: rgba(255, 255, 255, 0.85);
-  --nav-border: rgba(0, 0, 0, 0.08);
+/* ── DARK THEME (default) ── */
+:root,
+[data-theme="dark"] {
+  --background: #0E0C09;
+  --foreground: #F5F2EC;
 
-  /* Invoice form surface */
-  --inv-bg: #f4f5f7;
-  --inv-surface: #ffffff;
-  --inv-surface-hover: #f0f2f5;
-  --inv-border: #e2e5ea;
-  --inv-border2: #d0d4db;
+  /* App surfaces */
+  --inv-bg:           #0E0C09;
+  --inv-surface:      rgba(255,255,255,0.04);
+  --inv-surface-hover:rgba(255,255,255,0.08);
+  --inv-border:       rgba(255,255,255,0.10);
+  --inv-border-strong:rgba(255,255,255,0.20);
 
-  /* Invoice text */
-  --inv-text1: #111827;
-  --inv-text2: #374151;
-  --inv-text3: #6b7280;
-  --inv-text4: #9ca3af;
+  /* Text */
+  --inv-text1:  #F5F2EC;
+  --inv-text2:  #D4CEC5;
+  --inv-text3:  #9A9080;
+  --inv-text4:  #5A5347;
 
-  /* Invoice input */
-  --inv-input-bg: #ffffff;
-  --inv-input-border: #d1d5db;
-  --inv-label: #374151;
+  /* Navbar */
+  --inv-nav-bg:     rgba(14,12,9,0.95);
+  --inv-nav-border: rgba(255,255,255,0.10);
+  --inv-nav-text:   #F5F2EC;
+  --inv-nav-sub:    #9A9080;
+  --inv-dropdown-bg:#1C1812;
 
-  /* Invoice card */
-  --inv-card-bg: #ffffff;
-  --inv-card-border: #e5e7eb;
-  --inv-card-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  /* Navbar aliases (used by Navbar component) */
+  --nav-bg:     rgba(14,12,9,0.97);
+  --nav-border: rgba(255,255,255,0.10);
 
-  /* Section header */
-  --inv-section-bg: #f9fafb;
-  --inv-section-border: #e5e7eb;
-  --inv-section-text: #111827;
+  /* Card/section */
+  --inv-card-bg:      rgba(255,255,255,0.04);
+  --inv-card-border:  rgba(255,255,255,0.10);
+  --inv-input-bg:     rgba(255,255,255,0.04);
+  --inv-input-focus:  rgba(255,255,255,0.07);
 
-  /* Totals panel */
-  --inv-total-bg: #f9fafb;
-  --inv-total-border: #e5e7eb;
+  /* Scrollbar */
+  --inv-scrollbar: #4B5563;
 
-  /* Accent */
-  --inv-accent: #2563eb;
-  --inv-accent-hover: #1d4ed8;
+  /* Page background gradient */
+  --inv-grad1: rgba(232,201,122,0.07);
+  --inv-grad2: rgba(147,51,234,0.05);
+
+  /* Toasts */
+  --inv-toast-ok:  #081A10;
+  --inv-toast-err: #1A0808;
+  /* Dropdown menus */
+  --inv-dropdown-bg: #1C1812;
 }
 
-/* Light mode — explicit selector */
+/* ── LIGHT THEME ── */
 [data-theme="light"] {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #F5F4F1;
+  --foreground: #1A1510;
 
-  --nav-bg: rgba(255, 255, 255, 0.85);
-  --nav-border: rgba(0, 0, 0, 0.08);
+  /* App surfaces */
+  --inv-bg:           #F0EDE8;
+  --inv-surface:      #FFFFFF;
+  --inv-surface-hover:#F5F2ED;
+  --inv-border:       rgba(0,0,0,0.10);
+  --inv-border-strong:rgba(0,0,0,0.20);
 
-  --inv-bg: #f4f5f7;
-  --inv-surface: #ffffff;
-  --inv-surface-hover: #f0f2f5;
-  --inv-border: #e2e5ea;
-  --inv-border2: #d0d4db;
+  /* Text */
+  --inv-text1:  #1A1510;
+  --inv-text2:  #3D3530;
+  --inv-text3:  #6B6055;
+  --inv-text4:  #9A9080;
 
-  --inv-text1: #111827;
-  --inv-text2: #374151;
-  --inv-text3: #6b7280;
-  --inv-text4: #9ca3af;
+  /* Navbar */
+  --inv-nav-bg:     rgba(255,252,245,0.97);
+  --inv-nav-border: rgba(0,0,0,0.08);
+  --inv-nav-text:   #1A1510;
+  --inv-nav-sub:    #6B6055;
+  --inv-dropdown-bg:#FFFFFF;
 
-  --inv-input-bg: #ffffff;
-  --inv-input-border: #d1d5db;
-  --inv-label: #374151;
+  /* Navbar aliases */
+  --nav-bg:     rgba(255,252,245,0.97);
+  --nav-border: rgba(0,0,0,0.08);
 
-  --inv-card-bg: #ffffff;
-  --inv-card-border: #e5e7eb;
-  --inv-card-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  /* Card/section */
+  --inv-card-bg:      #FFFFFF;
+  --inv-card-border:  rgba(0,0,0,0.09);
+  --inv-input-bg:     #FAFAF8;
+  --inv-input-focus:  #FFFFFF;
 
-  --inv-section-bg: #f9fafb;
-  --inv-section-border: #e5e7eb;
-  --inv-section-text: #111827;
+  /* Scrollbar */
+  --inv-scrollbar: #C5BFB5;
 
-  --inv-total-bg: #f9fafb;
-  --inv-total-border: #e5e7eb;
+  /* Page background gradient */
+  --inv-grad1: rgba(232,201,122,0.12);
+  --inv-grad2: rgba(147,51,234,0.04);
 
-  --inv-accent: #2563eb;
-  --inv-accent-hover: #1d4ed8;
+  /* Toasts */
+  --inv-toast-ok:  #F0FDF4;
+  --inv-toast-err: #FEF2F2;
+  /* Dropdown menus */
+  --inv-dropdown-bg: #FFFFFF;
 }
 
-/* Dark mode */
-[data-theme="dark"] {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-
-  --nav-bg: rgba(15, 15, 20, 0.85);
-  --nav-border: rgba(255, 255, 255, 0.08);
-
-  --inv-bg: #0f1117;
-  --inv-surface: #1a1d27;
-  --inv-surface-hover: #1f2330;
-  --inv-border: #2a2d3a;
-  --inv-border2: #333646;
-
-  --inv-text1: #f3f4f6;
-  --inv-text2: #d1d5db;
-  --inv-text3: #9ca3af;
-  --inv-text4: #6b7280;
-
-  --inv-input-bg: #1a1d27;
-  --inv-input-border: #2a2d3a;
-  --inv-label: #d1d5db;
-
-  --inv-card-bg: #1a1d27;
-  --inv-card-border: #2a2d3a;
-  --inv-card-shadow: 0 1px 4px rgba(0,0,0,0.3);
-
-  --inv-section-bg: #14161f;
-  --inv-section-border: #2a2d3a;
-  --inv-section-text: #f3f4f6;
-
-  --inv-total-bg: #14161f;
-  --inv-total-border: #2a2d3a;
-
-  --inv-accent: #3b82f6;
-  --inv-accent-hover: #2563eb;
-}
-
-/* ════════════════════════════════════════════════
-   DARK MODE — toggled by next-themes via data-theme
-   ════════════════════════════════════════════════ */
-[data-theme="dark"] {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-
-  /* Nav */
-  --nav-bg: rgba(15, 15, 20, 0.85);
-  --nav-border: rgba(255, 255, 255, 0.08);
-
-  /* Invoice form surface */
-  --inv-bg: #0f1117;
-  --inv-surface: #1a1d27;
-  --inv-surface-hover: #1f2330;
-  --inv-border: #2a2d3a;
-  --inv-border2: #333646;
-
-  /* Invoice text */
-  --inv-text1: #f3f4f6;
-  --inv-text2: #d1d5db;
-  --inv-text3: #9ca3af;
-  --inv-text4: #6b7280;
-
-  /* Invoice input */
-  --inv-input-bg: #1a1d27;
-  --inv-input-border: #2a2d3a;
-  --inv-label: #d1d5db;
-
-  /* Invoice card */
-  --inv-card-bg: #1a1d27;
-  --inv-card-border: #2a2d3a;
-  --inv-card-shadow: 0 1px 4px rgba(0,0,0,0.3);
-
-  /* Section header */
-  --inv-section-bg: #14161f;
-  --inv-section-border: #2a2d3a;
-  --inv-section-text: #f3f4f6;
-
-  /* Totals panel */
-  --inv-total-bg: #14161f;
-  --inv-total-border: #2a2d3a;
-
-  /* Accent */
-  --inv-accent: #3b82f6;
-  --inv-accent-hover: #2563eb;
-}
-
-/* ════════════════════════════════════════════════
-   TAILWIND THEME BRIDGE
-   ════════════════════════════════════════════════ */
+/* ── Base styles ── */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -182,24 +113,55 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* ════════════════════════════════════════════════
-   BASE BODY
-   ════════════════════════════════════════════════ */
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-  transition: background 0.2s ease, color 0.2s ease;
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-/* ════════════════════════════════════════════════
-   PRINT — hide EVERYTHING except #inv-print
-   ════════════════════════════════════════════════ */
+body {
+  background:  var(--inv-bg);
+  color:       var(--inv-text1);
+  font-family: 'DM Sans', 'IBM Plex Sans', system-ui, sans-serif;
+  transition:  background 0.25s ease, color 0.25s ease;
+}
+
+/* Smooth theme transition on all elements */
+*, *::before, *::after {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--inv-scrollbar); border-radius: 99px; }
+
+/* ── Select option bg follows theme ── */
+select option { background: var(--inv-bg); color: var(--inv-text1); }
+
+/* ── Placeholder ── */
+::placeholder { color: var(--inv-text4) !important; opacity: 1; }
+
+/* ── Input date picker ── */
+[data-theme="dark"]  input[type=date]::-webkit-calendar-picker-indicator { filter: invert(0.6) sepia(1) saturate(2); }
+[data-theme="light"] input[type=date]::-webkit-calendar-picker-indicator { filter: none; opacity: 0.5; }
+
+/* ── Animations ── */
+@keyframes inv-fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes inv-slideDown {
+  from { opacity: 0; transform: translateY(-12px) translateX(-50%); }
+  to   { opacity: 1; transform: translateY(0)     translateX(-50%); }
+}
+@keyframes inv-spin { to { transform: rotate(360deg); } }
+@keyframes navFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── PRINT — hide everything except invoice ── */
 @media print {
-  @page {
-    size: A4;
-    margin: 0;
-  }
+  @page { size: A4; margin: 0; }
 
   body {
     margin: 1cm !important;
@@ -209,22 +171,10 @@ body {
     -webkit-print-color-adjust: exact;
   }
 
-  body > * {
-    display: none !important;
-  }
+  body > * { display: none !important; }
 
-  #inv-print {
-    display: block !important;
-  }
-
-  .inv-navbar,
-  nav,
-  header,
-  #inv-form,
-  [class*="navbar"],
-  [class*="nav-wrap"],
-  [class*="Navbar"],
-  footer:not(#inv-print footer) {
-    display: none !important;
-  }
+  #inv-print       { display: block !important; }
+  .inv-navbar      { display: none !important; }
+  #inv-form        { display: none !important; }
+  nav, header      { display: none !important; }
 }

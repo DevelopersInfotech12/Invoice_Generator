@@ -15,7 +15,7 @@ export default function AuthGuard({ children, redirectTo = "/login" }) {
   if (loading) {
     return (
       <div style={{
-        minHeight:"100vh", background:"#0E0C09",
+        minHeight:"100vh", background:"var(--inv-bg)",
         display:"flex", alignItems:"center", justifyContent:"center",
         flexDirection:"column", gap:16,
       }}>
@@ -25,7 +25,7 @@ export default function AuthGuard({ children, redirectTo = "/login" }) {
           borderTopColor:"#E8C97A",
           animation:"spin .7s linear infinite",
         }}/>
-        <p style={{ color:"#9A9080", fontSize:13, fontFamily:"'DM Sans',sans-serif", margin:0 }}>
+        <p style={{ color:"var(--inv-text3)", fontSize:13, fontFamily:"'DM Sans',sans-serif", margin:0 }}>
           Authenticating…
         </p>
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
