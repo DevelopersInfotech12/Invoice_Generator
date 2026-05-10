@@ -228,7 +228,7 @@ export function ShipmentDetails({ inv, set }) {
 /* ══════════════════════════════════════════════════════
    PARTY CARDS — seller + buyer
 ══════════════════════════════════════════════════════ */
-export function PartyCards({ inv, setInv, gstLoading, gstError, setGstError, fetchGST }) {
+export function PartyCards({ inv, setInv, gstLoading, gstError, setGstError, fetchGST, onClearSeller }) {
   /* Safe defaults — prevents crash if from/to is undefined */
   const from = inv?.from || EMPTY_FROM;
   const to   = inv?.to   || EMPTY_TO;
@@ -237,27 +237,32 @@ export function PartyCards({ inv, setInv, gstLoading, gstError, setGstError, fet
     <div className="inv-2col" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:16 }}>
       {/* Seller */}
       <Card>
-        <PartySection
-          title="Seller Details"
-          gstin={from.gstin || ""}
-          onGstinChange={e=>{
-            setGstError(er=>({...er,from:""}));
-            setInv(s=>({...s, from:{...(s?.from||EMPTY_FROM), gstin:e.target.value.toUpperCase()}}));
-          }}
-          onFetch={()=>fetchGST("from")}
-          loading={gstLoading.from}
-          error={gstError.from}
-          fields={[
-            {label:"Company Name", key:"name",    fullWidth:true},
-            {label:"Address",      key:"address", fullWidth:true},
-            {label:"City",         key:"city"},
-            {label:"State",        key:"state"},
-            {label:"PIN Code",     key:"zipCode"},
-            {label:"PAN",          key:"pan", mono:true},
-          ]}
-          values={from}
-          onChange={(k,v)=>setInv(s=>({...s, from:{...(s?.from||EMPTY_FROM), [k]:v}}))}
-        />
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:0 }}>
+          <div style={{ flex:1 }}>
+            <PartySection
+              title="Seller Details"
+              gstin={from.gstin || ""}
+              onGstinChange={e=>{
+                setGstError(er=>({...er,from:""}));
+                setInv(s=>({...s, from:{...(s?.from||EMPTY_FROM), gstin:e.target.value.toUpperCase()}}));
+              }}
+              onFetch={()=>fetchGST("from")}
+              loading={gstLoading.from}
+              error={gstError.from}
+              fields={[
+                {label:"Company Name", key:"name",    fullWidth:true},
+                {label:"Address",      key:"address", fullWidth:true},
+                {label:"City",         key:"city"},
+                {label:"State",        key:"state"},
+                {label:"PIN Code",     key:"zipCode"},
+                {label:"PAN",          key:"pan", mono:true},
+              ]}
+              values={from}
+              onChange={(k,v)=>setInv(s=>({...s, from:{...(s?.from||EMPTY_FROM), [k]:v}}))}
+              onClear={onClearSeller}
+            />
+          </div>
+        </div>
       </Card>
 
       {/* Buyer */}
@@ -549,7 +554,7 @@ function BankNameDropdown({ value, onChange }) {
         <div style={{
           position:"absolute", top:"100%", left:0, right:0,
           background:T.surface, border:`1px solid ${T.border}`,
-          borderRadius:6, marginTop:3, zIndex:1000,
+          borderRadius:6, marginTop:3,
           maxHeight:220, overflowY:"auto",
           boxShadow:"0 6px 24px rgba(0,0,0,0.12)",
           zIndex:9998,
@@ -576,46 +581,67 @@ function BankNameDropdown({ value, onChange }) {
   );
 }
 
-export function BankDetails({ inv, setBank }) {
+export function BankDetails({ inv, setBank, onClear }) {
   const [open, setOpen] = useState(false);
   const bank = inv?.bank || EMPTY_BANK;
 
   return (
-    <Card style={{ padding:0, overflow:"hidden" }}>
+    <Card style={{ padding:0, overflow: open ? "visible" : "hidden" }}>
       {/* Accordion header */}
-      <button
-        onClick={()=>setOpen(o=>!o)}
-        style={{
-          width:"100%", display:"flex", alignItems:"center",
-          justifyContent:"space-between",
-          padding:"14px 22px", background:"transparent", border:"none",
-          cursor:"pointer", textAlign:"left",
-        }}
-      >
-        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <span style={{
-            fontSize:11, fontWeight:700, color:T.text3,
-            textTransform:"uppercase", letterSpacing:".1em",
-          }}>Bank Details</span>
-          <span style={{
-            fontSize:10, color:T.text4, fontWeight:500,
-            background:"rgba(0,0,0,.04)", border:`1px solid ${T.border}`,
-            borderRadius:4, padding:"1px 7px",
-          }}>Optional</span>
-        </div>
-        <svg
-          width="16" height="16" viewBox="0 0 24 24" fill="none"
-          stroke={T.text4} strokeWidth="2.2"
-          style={{ transform:open?"rotate(180deg)":"none", transition:"transform .25s ease", flexShrink:0 }}
+      <div style={{ display:"flex", alignItems:"center" }}>
+        <button
+          onClick={()=>setOpen(o=>!o)}
+          style={{
+            flex:1, display:"flex", alignItems:"center",
+            justifyContent:"space-between",
+            padding:"14px 22px", background:"transparent", border:"none",
+            cursor:"pointer", textAlign:"left",
+          }}
         >
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
-      </button>
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <span style={{
+              fontSize:11, fontWeight:700, color:T.text3,
+              textTransform:"uppercase", letterSpacing:".1em",
+            }}>Bank Details</span>
+            <span style={{
+              fontSize:10, color:T.text4, fontWeight:500,
+              background:"rgba(0,0,0,.04)", border:`1px solid ${T.border}`,
+              borderRadius:4, padding:"1px 7px",
+            }}>Optional</span>
+          </div>
+          <svg
+            width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke={T.text4} strokeWidth="2.2"
+            style={{ transform:open?"rotate(180deg)":"none", transition:"transform .25s ease", flexShrink:0 }}
+          >
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        {/* Clear button — always visible in header */}
+        {onClear && (
+          <button onClick={onClear} title="Clear bank details" style={{
+            display:"inline-flex", alignItems:"center", gap:4,
+            padding:"5px 12px", margin:"0 14px 0 0", borderRadius:5, cursor:"pointer",
+            background:"transparent", border:`1px solid ${T.border}`,
+            color:T.text4, fontSize:11, fontWeight:600, fontFamily:"inherit",
+            transition:"all .15s", flexShrink:0,
+          }}
+          onMouseOver={e=>{ e.currentTarget.style.borderColor="#DC2626"; e.currentTarget.style.color="#DC2626"; }}
+          onMouseOut={e=>{ e.currentTarget.style.borderColor=T.border; e.currentTarget.style.color=T.text4; }}
+          >
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+              <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
+            </svg>
+            Clear
+          </button>
+        )}
+      </div>
 
       {/* Accordion body */}
       <div style={{
-        maxHeight: open ? 600 : 0,
-        overflow:"hidden",
+        maxHeight: open ? 700 : 0,
+        overflow: open ? "visible" : "hidden",
         transition:"max-height .35s ease",
       }}>
         <div style={{ padding:"4px 22px 22px", borderTop:`1px solid ${T.border}`, marginTop:0 }}>

@@ -117,10 +117,30 @@ export function FetchGSTBtn({ onClick, loading }) {
   );
 }
 
-export function PartySection({ title, gstin, onGstinChange, onFetch, loading, error, fields, values, onChange }) {
+export function PartySection({ title, gstin, onGstinChange, onFetch, loading, error, fields, values, onChange, onClear }) {
   return (
     <div>
-      <SectionLabel>{title}</SectionLabel>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:0 }}>
+        <SectionLabel>{title}</SectionLabel>
+        {onClear && (
+          <button onClick={onClear} title={`Clear ${title}`} style={{
+            display:"inline-flex", alignItems:"center", gap:4,
+            padding:"3px 10px", marginBottom:6, borderRadius:5, cursor:"pointer",
+            background:"transparent", border:`1px solid ${T.border}`,
+            color:T.text4, fontSize:11, fontWeight:600, fontFamily:"inherit",
+            transition:"all .15s", flexShrink:0,
+          }}
+          onMouseOver={e=>{ e.currentTarget.style.borderColor="#DC2626"; e.currentTarget.style.color="#DC2626"; }}
+          onMouseOut={e=>{ e.currentTarget.style.borderColor=T.border; e.currentTarget.style.color=T.text4; }}
+          >
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+              <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
+            </svg>
+            Clear
+          </button>
+        )}
+      </div>
       <div style={{ marginBottom:14 }}>
         <label style={{ fontSize:11, fontWeight:600, color:T.text3, textTransform:"uppercase", letterSpacing:".06em", display:"block", marginBottom:5 }}>GSTIN / UIN</label>
         <div style={{ display:"flex", gap:8, alignItems:"flex-end" }}>

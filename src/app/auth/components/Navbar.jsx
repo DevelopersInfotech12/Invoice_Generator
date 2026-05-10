@@ -153,8 +153,19 @@ export default function Navbar() {
                   }}
                 >
                   {user.avatar ? (
-                    <img src={user.avatar} alt={user.name}
-                      style={{ width:28, height:28, borderRadius:"50%", objectFit:"cover" }}/>
+                    <>
+                      <img src={user.avatar} alt={user.name}
+                        style={{ width:28, height:28, borderRadius:"50%", objectFit:"cover" }}
+                        onError={e => { e.currentTarget.style.display="none"; e.currentTarget.nextElementSibling.style.display="flex"; }}/>
+                      <div style={{
+                        width:28, height:28, borderRadius:"50%",
+                        background:"linear-gradient(135deg,#E8C97A,#B8913A)",
+                        display:"none", alignItems:"center", justifyContent:"center",
+                        fontSize:11, fontWeight:800, color:"#1A1008", flexShrink:0,
+                      }}>
+                        {initials}
+                      </div>
+                    </>
                   ) : (
                     <div style={{
                       width:28, height:28, borderRadius:"50%",
@@ -215,7 +226,7 @@ export default function Navbar() {
                         ),
                       },
                       {
-                        label:"Profile & Settings", href:"/profile",
+                        label:"Profile", href:"/profile",
                         icon:(
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>

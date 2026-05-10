@@ -12,19 +12,49 @@ import {
 const API_KEY = "0563aa1121mshac8e837fdc8b3c9p1838c5jsnd2139ed3c4e2";
 const API_HOST = "gst-insights-api.p.rapidapi.com";
 
+const EMPTY_FROM = { name: "", address: "", city: "", state: "", zipCode: "", stateCode: "", gstin: "", pan: "" };
+const EMPTY_BANK = { bankName: "", accountHolder: "", accountNumber: "", confirmAccountNumber: "", ifsc: "", accountType: "Current", branch: "" };
+
 const defaultInvoice = {
   invoiceNumber: "", date: new Date().toISOString().split("T")[0], suppliersRef: "",
   buyerOrderNo: "", dispatchDocNo: "", dispatchedThrough: "", termsOfDelivery: "",
-  from: { name: "", address: "", city: "", state: "", zipCode: "", stateCode: "", gstin: "", pan: "" },
+  from: EMPTY_FROM,
   to: { name: "", address: "", city: "", state: "", zipCode: "", gstin: "" },
   items: [{ description: "", hsn: "", quantity: 1, rate: 0, per: "Nos", amount: 0 }],
   tax: 18, taxType: "cgst_sgst",
   notes: "We declare that this Invoice shows the actual price of the goods described and that all particulars are true and correct.",
-  bank: { bankName: "", accountHolder: "", accountNumber: "", confirmAccountNumber: "", ifsc: "", accountType: "Current", branch: "" },
+  bank: EMPTY_BANK,
 };
 
+/* Build a new-invoice base with profile data pre-filled */
+function buildDefaultWithProfile() {
+  const base = { ...defaultInvoice };
+  try {
+    const savedGst = localStorage.getItem("inv_saved_gst");
+    if (savedGst) {
+      const g = JSON.parse(savedGst);
+      base.from = {
+        name:      g.companyName || "",
+        address:   g.address    || "",
+        city:      g.city       || "",
+        state:     g.state      || "",
+        zipCode:   g.zipCode    || "",
+        stateCode: "",
+        gstin:     g.gstin      || "",
+        pan:       g.pan        || "",
+      };
+    }
+    const savedBank = localStorage.getItem("inv_saved_bank");
+    if (savedBank) {
+      const b = JSON.parse(savedBank);
+      base.bank = { ...EMPTY_BANK, ...b, confirmAccountNumber: b.accountNumber || "" };
+    }
+  } catch {}
+  return base;
+}
+
 export default function InvoiceGenerator({ initialData = null }) {
-  const [inv, setInv] = useState(initialData || defaultInvoice);
+  const [inv, setInv] = useState(() => initialData || buildDefaultWithProfile());
   const [editingId, setEditingId] = useState(initialData?._id || null);
   const [isProforma, setIsProforma] = useState(initialData?.isProforma || false);
   const [isPrinting, setIsPrinting] = useState(false);
@@ -78,7 +108,19 @@ export default function InvoiceGenerator({ initialData = null }) {
   };
 
   /* ── New invoice ── */
-  const handleNew = () => { setInv(defaultInvoice); setEditingId(null); setIsProforma(false); showToast("Started new invoice."); };
+  const handleNew = () => { setInv(buildDefaultWithProfile()); setEditingId(null); setIsProforma(false); showToast("Started new invoice."); };
+
+  /* ── Clear seller details ── */
+  const handleClearSeller = () => {
+    setInv(s => ({ ...s, from: { name: "", address: "", city: "", state: "", zipCode: "", stateCode: "", gstin: "", pan: "" } }));
+    showToast("Seller details cleared.");
+  };
+
+  /* ── Clear bank details ── */
+  const handleClearBank = () => {
+    setInv(s => ({ ...s, bank: { bankName: "", accountHolder: "", accountNumber: "", confirmAccountNumber: "", ifsc: "", accountType: "Current", branch: "" } }));
+    showToast("Bank details cleared.");
+  };
 
   /* ── GST fetch ── */
   const fetchGST = async party => {
@@ -188,10 +230,10 @@ export default function InvoiceGenerator({ initialData = null }) {
 
           <InvoiceIdentity inv={inv} set={set} />
           <ShipmentDetails inv={inv} set={set} />
-          <PartyCards inv={inv} setInv={setInv} gstLoading={gstLoading} gstError={gstError} setGstError={setGstError} fetchGST={fetchGST} />
+          <PartyCards inv={inv} setInv={setInv} gstLoading={gstLoading} gstError={gstError} setGstError={setGstError} fetchGST={fetchGST} onClearSeller={handleClearSeller} />
           <LineItems inv={inv} set={set} updateItem={updateItem} subtotal={subtotal} />
           <NotesSummary inv={inv} set={set} isIGST={isIGST} igstAmt={igstAmt} cgst={cgst} sgst={sgst} subtotal={subtotal} total={total} />
-          <BankDetails inv={inv} setBank={setBank} />
+          <BankDetails inv={inv} setBank={setBank} onClear={handleClearBank} />
 
           {/* ── Footer ── */}
           <div style={{ textAlign: "center", paddingTop: 28, paddingBottom: 4 }}>

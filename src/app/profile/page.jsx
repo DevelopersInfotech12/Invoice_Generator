@@ -315,7 +315,7 @@ export default function ProfilePage() {
             fontSize:"clamp(1.5rem,4vw,2rem)",
             fontWeight:400, color:"#dba723", letterSpacing:"-.01em",
           }}>
-            Profile &amp; Settings
+            Profile
           </h1>
 
           {/* ── Avatar + info ── */}
@@ -488,30 +488,6 @@ export default function ProfilePage() {
               </form>
             </div>
           )}
-
-          {/* ── Sign out ── */}
-          <div style={{...card, border:"1px solid rgba(248,113,113,.2)", marginBottom:0}}>
-            <h2 style={{...sectionTitle, color:C.red}}>Sign Out</h2>
-            <p style={{margin:"0 0 18px",fontSize:13,color:"var(--inv-text3)"}}>
-              You will be redirected to the login page.
-            </p>
-            <button className="rbtn" onClick={handleLogout}
-              style={{
-                display:"inline-flex", alignItems:"center", gap:8,
-                padding:"11px 24px", borderRadius:12, cursor:"pointer",
-                border:"1.5px solid rgba(248,113,113,.2)",
-                background:"rgba(248,113,113,.06)",
-                color:"var(--inv-text2)", fontSize:13, fontWeight:600,
-                fontFamily:"inherit", transition:"all .2s",
-              }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                <polyline points="16 17 21 12 16 7"/>
-                <line x1="21" y1="12" x2="9" y2="12"/>
-              </svg>
-              Sign Out
-            </button>
-          </div>
 
         </div>
       </div>

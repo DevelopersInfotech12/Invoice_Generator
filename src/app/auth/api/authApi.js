@@ -126,4 +126,9 @@ export const invoiceApi = {
     const res = await authFetch(`/invoices/${id}`, { method: "DELETE" });
     return handleResponse(res);
   },
+
+  togglePin: async (id) => {
+    const res = await authFetch(`/invoices/${id}/pin`, { method: "PATCH" });
+    return handleResponse(res);
+  },
 };
