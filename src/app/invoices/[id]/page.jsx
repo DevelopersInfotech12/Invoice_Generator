@@ -24,12 +24,18 @@ function EditContent() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  // ── CHANGED: Auto-trigger print/download if ?print=1 is in the URL ──
+  // ── Auto-trigger print/download if ?print=1 is in the URL ──
   useEffect(() => {
     if (!loading && invoiceData && searchParams.get("print") === "1") {
-      // Small delay to let the invoice render fully before printing
+      const buyerName  = (invoiceData.to?.name || "").trim();
+      const invoiceNum = (invoiceData.invoiceNumber || "").trim();
+      const parts      = [buyerName, invoiceNum].filter(Boolean);
+      const printTitle = parts.length > 0 ? parts.join(" - ") : "Invoice";
+      const prevTitle  = document.title;
+      document.title   = printTitle;
       const timer = setTimeout(() => {
         window.print();
+        setTimeout(() => { document.title = prevTitle; }, 1000);
       }, 600);
       return () => clearTimeout(timer);
     }

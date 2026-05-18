@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import AuthGuard from "../auth/components/AuthGuard";
-import { invoiceApi } from "../auth/api/authApi";
+import { invoiceApi, sharePDF } from "../auth/api/authApi";
 import Link from "next/link";
 
 /* ── All colours via CSS variables — theme-aware ── */
@@ -68,6 +68,228 @@ function EmptyState({ hasFilter, onClear }) {
 
 /* ── Row card ── */
 function InvoiceRow({ invoice, serial, onDelete, onDuplicate, onPin, onDownload, onBuyerClick, deleting, duplicating, pinning, downloading }) {
+  const [sharing, setSharing] = useState(false);
+
+  const handleWhatsApp = async () => {
+    setSharing(true);
+    let container = null;
+    try {
+      /* ── Step 1: Load html2pdf from CDN ── */
+      if (!window.html2pdf) {
+        await new Promise((res, rej) => {
+          const s   = document.createElement("script");
+          s.src     = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+          s.onload  = res;
+          s.onerror = () => rej(new Error("Failed to load PDF library. Check your internet connection."));
+          document.head.appendChild(s);
+        });
+      }
+
+      /* ── Step 2: Fetch full invoice data ── */
+      const fullData = await invoiceApi.getOne(invoice._id);
+      const full     = fullData.invoice;
+
+      /* ── Step 3: Build invoice HTML in memory ── */
+      const isIGST   = full.taxType === "igst";
+      const subtotal = (full.items || []).reduce((s, i) => s + (i.amount || 0), 0);
+      const igstAmt  = subtotal * (full.tax || 0) / 100;
+      const cgst     = subtotal * (full.tax || 0) / 200;
+      const sgst     = subtotal * (full.tax || 0) / 200;
+      const taxAmt   = isIGST ? igstAmt : cgst + sgst;
+      const total    = subtotal + taxAmt;
+      const from     = full.from  || {};
+      const to       = full.to    || {};
+      const bank     = full.bank  || {};
+      const items    = full.items || [];
+      const fmt      = n => (Number(n) || 0).toFixed(2);
+      const hasBank  = !!(bank.bankName || bank.accountNumber);
+
+      const B = "1px solid #000";
+      const td = (extra="") =>
+        `border:${B};padding:4px 7px;font-family:Arial,sans-serif;font-size:10px;color:#000;vertical-align:top;line-height:1.4;${extra}`;
+
+      const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <style>
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:Arial,Helvetica,sans-serif; font-size:10px; color:#000; background:#fff; padding:20px 24px; }
+    table { width:100%; border-collapse:collapse; }
+    h1 { text-align:center; font-size:14px; font-weight:bold; margin-bottom:10px; }
+  </style>
+</head>
+<body>
+  <h1>${full.isProforma ? "Proforma Invoice" : "Tax Invoice"}</h1>
+
+  <table style="table-layout:fixed;">
+    <colgroup><col style="width:50%"/><col style="width:50%"/></colgroup>
+    <tr>
+      <td style="${td("padding:10px;")}">
+        <p style="font-weight:bold;font-size:12px;margin-bottom:2px;">${from.name || ""}</p>
+        ${from.address ? `<p>${from.address}</p>` : ""}
+        ${from.city    ? `<p>${from.city}</p>` : ""}
+        ${from.state   ? `<p>${from.state}${from.zipCode?", "+from.zipCode:""}</p>` : ""}
+        <p style="margin-top:3px;">GSTIN/UIN: ${from.gstin || "—"}</p>
+        ${from.pan     ? `<p>PAN: ${from.pan}</p>` : ""}
+      </td>
+      <td style="${td("padding:0;")}">
+        <table><colgroup><col style="width:55%"/><col style="width:45%"/></colgroup>
+          ${[
+            ["Invoice No.", full.invoiceNumber || "—"],
+            ["Dated",       full.date          || "—"],
+            ["Supplier's Ref", full.suppliersRef || "—"],
+          ].map(([l,v]) => `<tr><td style="${td("font-weight:600;")}">${l}</td><td style="${td()}">${v}</td></tr>`).join("")}
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" style="${td("padding:6px 10px;")}">
+        <b>Buyer:</b> <b style="font-size:11px;">${to.name || "—"}</b>
+        ${to.address ? " " + to.address : ""}
+        ${to.city    ? ", " + to.city   : ""}
+        ${to.state   ? ", " + to.state  : ""}
+        &nbsp;&nbsp;<b>GSTIN/UIN:</b> ${to.gstin || "—"}
+      </td>
+    </tr>
+  </table>
+
+  <table style="table-layout:fixed;">
+    <colgroup><col style="width:35%"/><col style="width:10%"/><col style="width:11%"/>
+              <col style="width:12%"/><col style="width:8%"/><col style="width:24%"/></colgroup>
+    <thead><tr>
+      ${["Description of Goods","HSN/SAC","Quantity","Rate","Per","Amount (₹)"]
+        .map(h => `<th style="${td("font-weight:bold;padding:5px 7px;")}">${h}</th>`).join("")}
+    </tr></thead>
+    <tbody>
+      ${items.map(item => `<tr>
+        <td style="${td()}">${item.description||""}</td>
+        <td style="${td("text-align:center;")}">${item.hsn||""}</td>
+        <td style="${td("text-align:center;")}">${item.quantity||0} ${item.per||""}</td>
+        <td style="${td("text-align:right;")}">${fmt(item.rate)}</td>
+        <td style="${td("text-align:center;")}">${item.per||""}</td>
+        <td style="${td("text-align:right;")}">₹${fmt(item.amount)}</td>
+      </tr>`).join("")}
+      <tr>
+        <td colspan="4" style="${td("height:60px;")}"></td>
+        <td colspan="2" style="${td("vertical-align:bottom;padding:6px 7px;")}">
+          ${isIGST
+            ? `<div style="display:flex;justify-content:space-between;"><span>IGST @ ${full.tax}%</span><span>${fmt(igstAmt)}</span></div>`
+            : `<div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span>CGST @ ${(full.tax||0)/2}%</span><span>${fmt(cgst)}</span></div>
+               <div style="display:flex;justify-content:space-between;"><span>SGST @ ${(full.tax||0)/2}%</span><span>${fmt(sgst)}</span></div>`}
+        </td>
+      </tr>
+      <tr>
+        <td colspan="5" style="${td("font-weight:bold;padding:5px 7px;")}">Total</td>
+        <td style="${td("font-weight:bold;text-align:right;padding:5px 7px;")}">₹${fmt(total)}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  ${hasBank ? `
+  <table>
+    <tr>
+      <td style="${td()}"><b>Bank:</b> ${bank.bankName||"—"}</td>
+      <td style="${td()}"><b>A/C No.:</b> ${bank.accountNumber||"—"}</td>
+      <td style="${td()}"><b>IFSC:</b> ${bank.ifsc||"—"}</td>
+      <td style="${td()}"><b>Branch:</b> ${bank.branch||"—"}</td>
+    </tr>
+  </table>` : ""}
+
+  <table style="margin-top:4px;">
+    <tr>
+      <td style="${td("padding:6px 7px;")}">
+        <p style="font-weight:600;margin-bottom:3px;">Declaration</p>
+        <p style="font-size:9px;">${full.notes||""}</p>
+      </td>
+    </tr>
+  </table>
+
+  <table style="table-layout:fixed;margin-top:4px;">
+    <colgroup><col style="width:50%"/><col style="width:50%"/></colgroup>
+    <tr>
+      <td style="${td("padding:10px;height:72px;vertical-align:top;")}">
+        <b>Customer's Seal and Signature</b>
+      </td>
+      <td style="${td("padding:10px;text-align:right;vertical-align:top;")}">
+        <p style="font-weight:600;margin-bottom:44px;">for ${from.name||""}</p>
+        <p>Authorised Signatory</p>
+      </td>
+    </tr>
+  </table>
+
+  <p style="text-align:center;margin-top:8px;font-size:9px;color:#555;">
+    This is a Computer Generated Invoice
+  </p>
+  <div style="margin-top:10px;padding-top:6px;border-top:1px solid #ddd;text-align:center;font-size:8px;color:#888;">
+    Powered by: <b style="color:#555;">Developers Infotech Pvt Ltd</b> — developersinfotech.in
+  </div>
+</body>
+</html>`;
+
+      /* ── Step 4: Create hidden container, render HTML, generate PDF blob ── */
+      let container = document.createElement("div");
+      container.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:794px;";
+      container.innerHTML = htmlContent;
+      document.body.appendChild(container);
+
+      const filename = (full.invoiceNumber || "invoice").replace(/[^a-zA-Z0-9\-_]/g, "_") + ".pdf";
+
+      const blob = await window.html2pdf()
+        .set({
+          margin:      [8, 8, 8, 8],
+          filename,
+          image:       { type: "jpeg", quality: 0.95 },
+          html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+          jsPDF:       { unit: "mm", format: "a4", orientation: "portrait" },
+        })
+        .from(container)
+        .outputPdf("blob");
+
+      document.body.removeChild(container);
+      container = null;
+
+      /* ── Step 5: Upload to backend, get public link ── */
+      let result;
+      try {
+        result = await sharePDF(blob, filename);
+      } catch(uploadErr) {
+        throw new Error("PDF generated but upload failed: " + uploadErr.message + ". Make sure BACKEND_URL is set in your .env file.");
+      }
+
+      /* ── Step 6: Open WhatsApp with PDF link ── */
+      const num   = full.invoiceNumber || "Invoice";
+      const buyer = to.name || "";
+      const from_name = from.name || "";
+      const amt   = "Rs." + Number(total).toLocaleString("en-IN", { minimumFractionDigits: 2 });
+      const lines = [
+        "*Invoice: " + num + "*",
+        from_name ? "From: " + from_name : "",
+        buyer     ? "To: "   + buyer     : "",
+        "Amount: " + amt,
+        "",
+        "*Download Invoice PDF:*",
+        result.url,
+        "",
+        "_(Link valid for 24 hours)_",
+        "_Sent via Invoice Wallah_",
+      ].filter(Boolean);
+      const text = lines.join("\n");
+
+      window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
+
+    } catch (err) {
+      console.error("WhatsApp PDF share failed:", err);
+      if (container && document.body.contains(container)) {
+        document.body.removeChild(container);
+      }
+      alert("WhatsApp share failed:\n\n" + err.message + "\n\nCheck browser console (F12) for details.");
+    } finally {
+      setSharing(false);
+    }
+  };
+
   const router = useRouter();
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -140,10 +362,6 @@ function InvoiceRow({ invoice, serial, onDelete, onDuplicate, onPin, onDownload,
           overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
           {invoice.invoiceNumber || "Untitled Invoice"}
         </p>
-        <p style={{ margin:"2px 0 0", fontSize:12, color:C.text3,
-          overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-          {invoice.to?.name || "No buyer specified"}
-        </p>
       </div>
 
       {/* Buyer — clickable filter */}
@@ -182,10 +400,10 @@ function InvoiceRow({ invoice, serial, onDelete, onDuplicate, onPin, onDownload,
       <div style={{ display:"flex", gap:6, alignItems:"center", flexShrink:0, flexWrap:"wrap" }}>
         {confirmDelete ? (
           <>
-            <button onClick={()=>setConfirmDelete(false)}
+            <button onClick={() => setConfirmDelete(false)}
               style={{ ...baseBtn, background:C.surface, color:C.text3,
                 border:"1px solid " + C.border }}>Cancel</button>
-            <button onClick={()=>{ onDelete(invoice._id); setConfirmDelete(false); }}
+            <button onClick={() => { onDelete(invoice._id); setConfirmDelete(false); }}
               disabled={deleting}
               style={{ ...baseBtn, background:"rgba(248,113,113,.15)", color:C.red,
                 border:"1px solid rgba(248,113,113,.3)" }}>
@@ -214,15 +432,34 @@ function InvoiceRow({ invoice, serial, onDelete, onDuplicate, onPin, onDownload,
                 : <><DownloadIcon/> PDF</>}
             </button>
 
+            {/* WhatsApp Share */}
+            <button onClick={handleWhatsApp}
+              title="Share on WhatsApp"
+              className="inv-btn-wa"
+              disabled={sharing}
+              style={{ ...baseBtn, background:"rgba(37,211,102,.10)", color:"#25D366",
+                border:"1px solid rgba(37,211,102,.25)", opacity:sharing ? 0.7 : 1 }}>
+              {sharing ? (
+                <><SpinIcon color="#25D366"/> Generating…</>
+              ) : (
+                <>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                  </svg>
+                  Share
+                </>
+              )}
+            </button>
+
             {/* Edit */}
-            <button onClick={()=>router.push("/invoices/" + invoice._id)}
+            <button onClick={() => router.push("/invoices/" + invoice._id)}
               className="inv-btn-edit"
               style={{ ...baseBtn, background:C.goldBg, color:C.gold, border:"1px solid " + C.goldBdr }}>
               <EditIcon/> Edit
             </button>
 
             {/* Duplicate */}
-            <button onClick={()=>onDuplicate(invoice)} disabled={duplicating}
+            <button onClick={() => onDuplicate(invoice)} disabled={duplicating}
               className="inv-btn-dup"
               style={{ ...baseBtn, background:"rgba(96,165,250,.10)", color:C.blue,
                 border:"1px solid rgba(96,165,250,.25)" }}>
@@ -232,7 +469,7 @@ function InvoiceRow({ invoice, serial, onDelete, onDuplicate, onPin, onDownload,
             </button>
 
             {/* Delete */}
-            <button onClick={()=>setConfirmDelete(true)} className="inv-btn-del"
+            <button onClick={() => setConfirmDelete(true)} className="inv-btn-del"
               style={{ ...baseBtn, padding:"7px 10px",
                 background:"rgba(248,113,113,.08)", color:C.text3,
                 border:"1px solid rgba(248,113,113,.18)" }}>
@@ -288,8 +525,8 @@ function InvoicesContent() {
   const [downloading, setDownloading] = useState(null);
   const [search,      setSearch]      = useState("");
   const [buyerFilter, setBuyerFilter] = useState("");
-  const [dateFilter,    setDateFilter]    = useState("");   // "YYYY-MM-DD"
-  const [monthFilter,   setMonthFilter]   = useState("");   // "YYYY-MM"
+  const [dateFilter,    setDateFilter]    = useState("");
+  const [monthFilter,   setMonthFilter]   = useState("");
   const [selMonth, setSelMonth] = useState(String(new Date().getMonth()+1).padStart(2,"0"));
   const [selYear,  setSelYear]  = useState(String(new Date().getFullYear()));
   const [page,        setPage]        = useState(1);
@@ -301,7 +538,7 @@ function InvoicesContent() {
 
   const showToast = (msg, ok=true) => {
     setToast({ msg, ok });
-    setTimeout(()=>setToast(null), 3200);
+    setTimeout(() => setToast(null), 3200);
   };
 
   const loadInvoices = useCallback(async () => {
@@ -323,7 +560,6 @@ function InvoicesContent() {
       setInvoices(list);
       setTotalPages(data.pages || 1);
       setTotalCount(data.total || 0);
-      // Collect unique buyer names for dropdown
       const buyers = [...new Set(
         (data.invoices || []).map(inv => inv.to?.name).filter(Boolean)
       )].sort();
@@ -335,16 +571,14 @@ function InvoicesContent() {
     }
   }, [page, search, buyerFilter, dateFilter, monthFilter]);
 
-  useEffect(()=>{ loadInvoices(); }, [loadInvoices]);
+  useEffect(() => { loadInvoices(); }, [loadInvoices]);
 
-  // Debounce search
-  useEffect(()=>{
-    const t = setTimeout(()=>{ setSearch(searchInput); setPage(1); }, 400);
-    return ()=>clearTimeout(t);
+  useEffect(() => {
+    const t = setTimeout(() => { setSearch(searchInput); setPage(1); }, 400);
+    return () => clearTimeout(t);
   }, [searchInput]);
 
-  // Sync month+year selects → monthFilter (fires on mount with defaults too)
-  useEffect(()=>{
+  useEffect(() => {
     if (selYear && selMonth) {
       setMonthFilter(selYear + "-" + selMonth);
       setPage(1);
@@ -430,9 +664,9 @@ function InvoicesContent() {
         .inv-row-card:hover   { border-color:rgba(232,201,122,.35)!important; box-shadow:0 4px 28px rgba(0,0,0,.12)!important; }
         .inv-btn-edit:hover   { background:rgba(232,201,122,.22)!important; }
         .inv-btn-dup:hover    { background:rgba(96,165,250,.22)!important; }
+        .inv-btn-wa:hover     { background:rgba(37,211,102,.20)!important; border-color:rgba(37,211,102,.5)!important; }
         .inv-btn-del:hover    { background:rgba(248,113,113,.2)!important; color:#F87171!important; border-color:rgba(248,113,113,.45)!important; }
 
-        /* ── Shared input base ── */
         .inv-filter-input {
           background: var(--inv-surface) !important;
           color: var(--inv-text1) !important;
@@ -455,13 +689,11 @@ function InvoicesContent() {
           color: var(--inv-text1);
         }
 
-        /* Search */
         .inv-search-input {
           width: 100%;
           padding: 0 14px 0 40px;
         }
 
-        /* Buyer select dropdown */
         .inv-buyer-select {
           min-width: 160px;
           max-width: 260px;
@@ -473,7 +705,6 @@ function InvoicesContent() {
         }
         .inv-buyer-select:focus { border-color: #E8C97A !important; box-shadow: 0 0 0 3px rgba(232,201,122,.12) !important; }
 
-        /* Date / Month selects — labelled wrapper */
         .inv-date-wrap {
           flex-shrink: 0;
           display: flex; flex-direction: column; gap: 3px;
@@ -502,9 +733,7 @@ function InvoicesContent() {
         .inv-sel option { background: var(--inv-surface); color: var(--inv-text1); }
         .inv-sel-month { width: 120px; }
         .inv-sel-year  { width: 88px; }
-        .inv-sel-day   { width: 76px; }
 
-        /* Divider between filter fields */
         .inv-filter-divider {
           width: 1px; height: 26px; flex-shrink: 0;
           background: var(--inv-border);
@@ -512,7 +741,6 @@ function InvoicesContent() {
           margin-bottom: 10px;
         }
 
-        /* Active filter pills */
         .inv-pill {
           display: inline-flex; align-items: center; gap: 7px;
           padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
@@ -524,7 +752,6 @@ function InvoicesContent() {
         }
         .inv-pill-close:hover { opacity: 1; }
 
-        /* Responsive */
         .inv-filter-row { flex-wrap: wrap; }
         @media(max-width: 900px) {
           .inv-filter-row { flex-direction: column !important; align-items: stretch !important; }
@@ -570,8 +797,8 @@ function InvoicesContent() {
             </h1>
             <p style={{ margin:"4px 0 0", fontSize:13, color:C.text3 }}>
               {loading ? "Loading…" : hasFilter
-                ? invoices.length + " invoice" + (invoices.length!==1?"s":"") + " matching filters"
-                : totalCount + " invoice" + (totalCount!==1?"s":"") + " total"}
+                ? invoices.length + " invoice" + (invoices.length !== 1 ? "s" : "") + " matching filters"
+                : totalCount + " invoice" + (totalCount !== 1 ? "s" : "") + " total"}
             </p>
           </div>
           <Link href="/" style={{
@@ -588,7 +815,7 @@ function InvoicesContent() {
           </Link>
         </div>
 
-        {/* ── Filter row: Search | Buyer | Date | Month ── */}
+        {/* Filter row */}
         <div className="inv-filter-row" style={{ display:"flex", gap:8, marginBottom:10, alignItems:"flex-end" }}>
 
           {/* Search */}
@@ -605,7 +832,7 @@ function InvoicesContent() {
               className="inv-filter-input inv-search-input"
             />
             {searchInput && (
-              <button onClick={()=>setSearchInput("")} style={{
+              <button onClick={() => setSearchInput("")} style={{
                 position:"absolute", right:10, top:"50%", transform:"translateY(-50%)",
                 background:"none", border:"none", cursor:"pointer",
                 color:C.text4, fontSize:18, padding:4, lineHeight:1,
@@ -615,15 +842,13 @@ function InvoicesContent() {
 
           <div className="inv-filter-divider"/>
 
-          {/* Buyer filter — select dropdown */}
+          {/* Buyer filter */}
           <div style={{ position:"relative", flexShrink:0 }}>
-            {/* Person icon */}
             <svg style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)", pointerEvents:"none", zIndex:1 }}
               width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--inv-text4)" strokeWidth="2">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
               <circle cx="12" cy="7" r="4"/>
             </svg>
-            {/* Chevron icon */}
             <svg style={{ position:"absolute", right:10, top:"50%", transform:"translateY(-50%)", pointerEvents:"none", zIndex:1 }}
               width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--inv-text4)" strokeWidth="2.5">
               <polyline points="6 9 12 15 18 9"/>
@@ -642,7 +867,7 @@ function InvoicesContent() {
 
           <div className="inv-filter-divider"/>
 
-          {/* Date filter — single date input */}
+          {/* Date filter */}
           <div className="inv-date-wrap">
             <span className="inv-date-label">📅 Filter by Date</span>
             <div style={{ position:"relative" }}>
@@ -655,7 +880,7 @@ function InvoicesContent() {
                 title="Filter by exact date"
               />
               {dateFilter && (
-                <button onClick={()=>{ setDateFilter(""); setPage(1); }} style={{
+                <button onClick={() => { setDateFilter(""); setPage(1); }} style={{
                   position:"absolute", right:30, top:"50%", transform:"translateY(-50%)",
                   background:"none", border:"none", cursor:"pointer",
                   color:C.text4, fontSize:16, padding:2, lineHeight:1, zIndex:2,
@@ -666,19 +891,18 @@ function InvoicesContent() {
 
           <div className="inv-filter-divider"/>
 
-          {/* Month filter — Month + Year selects */}
+          {/* Month filter */}
           <div className="inv-date-wrap">
             <span className="inv-date-label">🗓 Filter by Month</span>
             <div className="inv-date-row">
-              {/* Month */}
               <div style={{ position:"relative" }}>
                 <select
                   value={selMonth}
-                  onChange={e => { setSelMonth(e.target.value); }}
+                  onChange={e => setSelMonth(e.target.value)}
                   className="inv-sel inv-sel-month"
                 >
                   <option value="">Month</option>
-                  {["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].map((m,i)=>(
+                  {["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].map((m,i) => (
                     <option key={m} value={String(i+1).padStart(2,"0")}>{m}</option>
                   ))}
                 </select>
@@ -688,15 +912,14 @@ function InvoicesContent() {
                 </svg>
               </div>
 
-              {/* Year */}
               <div style={{ position:"relative" }}>
                 <select
                   value={selYear}
-                  onChange={e => { setSelYear(e.target.value); }}
+                  onChange={e => setSelYear(e.target.value)}
                   className="inv-sel inv-sel-year"
                 >
                   <option value="">Year</option>
-                  {Array.from({length:6},(_,i)=> String(new Date().getFullYear() - i)).map(y=>(
+                  {Array.from({length:6}, (_,i) => String(new Date().getFullYear() - i)).map(y => (
                     <option key={y} value={y}>{y}</option>
                   ))}
                 </select>
@@ -707,7 +930,7 @@ function InvoicesContent() {
               </div>
 
               {(selMonth || selYear) && (
-                <button onClick={()=>{ setSelMonth(""); setSelYear(""); setMonthFilter(""); setPage(1); }} title="Clear month" style={{
+                <button onClick={() => { setSelMonth(""); setSelYear(""); setMonthFilter(""); setPage(1); }} title="Clear month" style={{
                   background:"rgba(248,113,113,.10)", border:"1px solid rgba(248,113,113,.25)",
                   borderRadius:8, cursor:"pointer", color:C.red,
                   fontSize:16, padding:"0 10px", height:46, lineHeight:1,
@@ -717,10 +940,9 @@ function InvoicesContent() {
           </div>
         </div>
 
-        {/* ── Active filter pills ── */}
+        {/* Active filter pills */}
         {(buyerFilter || dateFilter || monthFilter) && (
           <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:12 }}>
-
             {buyerFilter && (
               <div className="inv-pill" style={{
                 background:"rgba(96,165,250,.08)", border:"1px solid rgba(96,165,250,.22)",
@@ -732,7 +954,7 @@ function InvoicesContent() {
                   Buyer: <span style={{ color:C.text1, fontWeight:500 }}>{buyerFilter}</span>
                 </span>
                 <button className="inv-pill-close" style={{ color:C.text4 }}
-                  onClick={()=>{ setBuyerFilter(""); setPage(1); }}>×</button>
+                  onClick={() => { setBuyerFilter(""); setPage(1); }}>×</button>
               </div>
             )}
 
@@ -749,7 +971,7 @@ function InvoicesContent() {
                   </span>
                 </span>
                 <button className="inv-pill-close" style={{ color:C.text4 }}
-                  onClick={()=>{ setDateFilter(""); setPage(1); }}>×</button>
+                  onClick={() => { setDateFilter(""); setPage(1); }}>×</button>
               </div>
             )}
 
@@ -766,7 +988,7 @@ function InvoicesContent() {
                   </span>
                 </span>
                 <button className="inv-pill-close" style={{ color:C.text4 }}
-                  onClick={()=>{ setMonthFilter(""); setPage(1); }}>×</button>
+                  onClick={() => { setMonthFilter(""); setPage(1); }}>×</button>
               </div>
             )}
 
@@ -787,11 +1009,11 @@ function InvoicesContent() {
             display:"grid", gridTemplateColumns:"38px 1fr 1fr 1fr auto",
             gap:14, padding:"0 20px", marginBottom:8,
           }}>
-            {["#", "Invoice / Buyer", "Buyer (click to filter)", "Total", "Actions"].map((h,i)=>(
+            {["#", "Invoice / Buyer", "Buyer (click to filter)", "Total", "Actions"].map((h,i) => (
               <span key={i} style={{
                 fontSize:10, fontWeight:800, color:C.text4,
                 textTransform:"uppercase", letterSpacing:".1em",
-                textAlign: i===0?"center":i===4?"right":"left",
+                textAlign: i===0 ? "center" : i===4 ? "right" : "left",
               }}>{h}</span>
             ))}
           </div>
@@ -857,24 +1079,24 @@ function InvoicesContent() {
 
             {totalPages > 1 && (
               <div style={{ display:"flex", justifyContent:"center", gap:8 }}>
-                <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page===1}
+                <button onClick={() => setPage(p => Math.max(1,p-1))} disabled={page===1}
                   style={{ padding:"8px 16px", borderRadius:10, cursor:"pointer",
                     border:"1px solid " + C.border, background:"transparent",
-                    color:page===1?C.text4:C.text2, fontSize:13, fontFamily:"inherit",
-                    opacity:page===1?0.5:1 }}>← Prev</button>
-                {Array.from({length:totalPages},(_,i)=>i+1).map(p=>(
-                  <button key={p} onClick={()=>setPage(p)}
+                    color:page===1 ? C.text4 : C.text2, fontSize:13, fontFamily:"inherit",
+                    opacity:page===1 ? 0.5 : 1 }}>← Prev</button>
+                {Array.from({length:totalPages}, (_,i) => i+1).map(p => (
+                  <button key={p} onClick={() => setPage(p)}
                     style={{ padding:"8px 14px", borderRadius:10, cursor:"pointer",
-                      border:"1px solid " + (p===page?C.goldBdr:C.border),
-                      background:p===page?C.goldBg:"transparent",
-                      color:p===page?C.gold:C.text2,
-                      fontSize:13, fontWeight:p===page?700:400, fontFamily:"inherit" }}>{p}</button>
+                      border:"1px solid " + (p===page ? C.goldBdr : C.border),
+                      background:p===page ? C.goldBg : "transparent",
+                      color:p===page ? C.gold : C.text2,
+                      fontSize:13, fontWeight:p===page ? 700 : 400, fontFamily:"inherit" }}>{p}</button>
                 ))}
-                <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page===totalPages}
+                <button onClick={() => setPage(p => Math.min(totalPages,p+1))} disabled={page===totalPages}
                   style={{ padding:"8px 16px", borderRadius:10, cursor:"pointer",
                     border:"1px solid " + C.border, background:"transparent",
-                    color:page===totalPages?C.text4:C.text2, fontSize:13, fontFamily:"inherit",
-                    opacity:page===totalPages?0.5:1 }}>Next →</button>
+                    color:page===totalPages ? C.text4 : C.text2, fontSize:13, fontFamily:"inherit",
+                    opacity:page===totalPages ? 0.5 : 1 }}>Next →</button>
               </div>
             )}
           </>

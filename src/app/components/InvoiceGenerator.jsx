@@ -104,7 +104,21 @@ export default function InvoiceGenerator({ initialData = null }) {
   /* ── Print ── */
   const handlePrint = () => {
     setIsPrinting(true);
-    setTimeout(() => { window.print(); setTimeout(() => setIsPrinting(false), 500); }, 100);
+    // Build a meaningful filename: buyer name + invoice number
+    const buyerName    = (inv.to?.name || "").trim();
+    const invoiceNum   = (inv.invoiceNumber || "").trim();
+    const parts        = [buyerName, invoiceNum].filter(Boolean);
+    const printTitle   = parts.length > 0 ? parts.join(" - ") : "Invoice";
+    const prevTitle    = document.title;
+    document.title     = printTitle;
+    setTimeout(() => {
+      window.print();
+      // Restore title after print dialog closes
+      setTimeout(() => {
+        document.title = prevTitle;
+        setIsPrinting(false);
+      }, 500);
+    }, 100);
   };
 
   /* ── New invoice ── */

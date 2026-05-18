@@ -132,3 +132,20 @@ export const invoiceApi = {
     return handleResponse(res);
   },
 };
+
+/* ── Share PDF (upload blob → get public link) ── */
+export const sharePDF = async (pdfBlob, filename) => {
+  const token = tokenStorage.get();
+  const form  = new FormData();
+  form.append("pdf",  pdfBlob, filename);
+  form.append("name", filename);
+
+  const res = await fetch(`${BASE}/share/pdf`, {
+    method:  "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body:    form,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to upload PDF.");
+  return data; // { url, expiresIn }
+};
