@@ -257,7 +257,7 @@ export default function InvoiceGenerator({ initialData = null }) {
                 style={{ color: "#2563EB", fontWeight: 600, textDecoration: "none",  }}
                 onMouseOver={e => e.currentTarget.style.color = "#2563EB"}
                 onMouseOut={e => e.currentTarget.style.color = "var(--inv-text3)"}>
-                Invoice Wallah
+                Developers Infotech Pvt Ltd
               </a>
             </span>
           </div>

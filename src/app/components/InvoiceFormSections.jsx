@@ -207,16 +207,16 @@ export function ShipmentDetails({ inv, set }) {
           gap:14,
           marginTop:14,
         }}>
-          <Input label="Buyer's Order No. (Optional)"
+          <Input label="Buyer's Order No. "
             value={inv?.buyerOrderNo || ""}
             onChange={e=>set({ buyerOrderNo:e.target.value })}/>
-          <Input label="Dispatch Doc No. (Optional)"
+          <Input label="Dispatch Doc No. "
             value={inv?.dispatchDocNo || ""}
             onChange={e=>set({ dispatchDocNo:e.target.value })}/>
-          <Input label="Dispatched Through (Optional)"
+          <Input label="Dispatched Through "
             value={inv?.dispatchedThrough || ""}
             onChange={e=>set({ dispatchedThrough:e.target.value })}/>
-          <Input label="Terms of Delivery (Optional)"
+          <Input label="Terms of Delivery"
             value={inv?.termsOfDelivery || ""}
             onChange={e=>set({ termsOfDelivery:e.target.value })}/>
         </div>
@@ -652,11 +652,11 @@ export function BankDetails({ inv, setBank, onClear }) {
               value={bank.bankName || ""}
               onChange={v=>setBank("bankName", v)}
             />
-            <Input label="Account Holder (Optional)"
+            <Input label="Account Holder"
               value={bank.accountHolder || ""}
               onChange={e=>setBank("accountHolder", e.target.value)}/>
             <div>
-              <Input label="Account Number (Optional)"
+              <Input label="Account Number "
                 value={bank.accountNumber || ""}
                 mono
                 onChange={e=>setBank("accountNumber", e.target.value)}
@@ -667,7 +667,7 @@ export function BankDetails({ inv, setBank, onClear }) {
                 }/>
             </div>
             <div>
-              <Input label="Confirm A/C No. (Optional)"
+              <Input label="Confirm A/C No. "
                 value={bank.confirmAccountNumber || ""}
                 mono
                 onChange={e=>setBank("confirmAccountNumber", e.target.value)}
@@ -687,11 +687,11 @@ export function BankDetails({ inv, setBank, onClear }) {
 
           {/* Row 2: IFSC, Branch, Account Type */}
           <div className="inv-bank-bottom" style={{ display:"grid", gridTemplateColumns:"1fr 2fr 1fr", gap:14 }}>
-            <Input label="IFSC Code (Optional)"
+            <Input label="IFSC Code "
               value={bank.ifsc || ""}
               mono
               onChange={e=>setBank("ifsc", e.target.value.toUpperCase())}/>
-            <Input label="Branch (Optional)"
+            <Input label="Branch "
               value={bank.branch || ""}
               onChange={e=>setBank("branch", e.target.value)}/>
             <CustomSelect

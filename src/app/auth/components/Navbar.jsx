@@ -35,6 +35,7 @@ export default function Navbar() {
   return (
     <>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap');
         @keyframes navFadeIn {
           from { opacity:0; transform:translateY(-6px); }
           to   { opacity:1; transform:translateY(0); }
@@ -70,11 +71,27 @@ export default function Navbar() {
         }}>
 
           {/* ── Logo ── */}
-          <Link href="/" style={{ textDecoration:"none", display:"flex", alignItems:"center", gap:12 }}>
+          <Link href="/" style={{ textDecoration:"none", display:"flex", alignItems:"center", gap:10 }}>
+            <img
+              src="/logonew.png"
+              alt="Invoice Wallah"
+              style={{
+                width: 36,
+                height: 36,
+                objectFit: "contain",
+                borderRadius: 8,
+              }}
+              onError={e => {
+                /* Fallback to SVG if image missing */
+                e.currentTarget.style.display = "none";
+                e.currentTarget.nextElementSibling.style.display = "flex";
+              }}
+            />
+            {/* SVG fallback — hidden by default */}
             <div style={{
               width:36, height:36, borderRadius:10, flexShrink:0,
               background:"linear-gradient(135deg,#E8C97A,#B8913A)",
-              display:"flex", alignItems:"center", justifyContent:"center",
+              display:"none", alignItems:"center", justifyContent:"center",
               boxShadow:"0 2px 12px rgba(232,201,122,.3)",
             }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1008" strokeWidth="2">
@@ -86,14 +103,14 @@ export default function Navbar() {
             </div>
             <span style={{
               fontSize:16, fontWeight:700,
-              color: "var(--inv-text1)",
-              fontFamily:"'DM Serif Display',serif", letterSpacing:"-.01em",
+              color: "#C5A04B",
+              fontFamily:"'Poppins','system-ui',sans-serif", letterSpacing:"-.01em",
             }}>
-              Invoice Generator
+              Invoice Wallah
             </span>
           </Link>
 
-          {/* ── Right side: toggle + user menu grouped ── */}
+          {/* ── Right side ── */}
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
 
             {/* Theme toggle */}
@@ -140,7 +157,6 @@ export default function Navbar() {
             {user ? (
               <div ref={menuRef} style={{ position:"relative" }}>
 
-                {/* Avatar button */}
                 <button
                   className="nav-avatar-btn"
                   onClick={() => setMenuOpen(o => !o)}
@@ -156,7 +172,10 @@ export default function Navbar() {
                     <>
                       <img src={user.avatar} alt={user.name}
                         style={{ width:28, height:28, borderRadius:"50%", objectFit:"cover" }}
-                        onError={e => { e.currentTarget.style.display="none"; e.currentTarget.nextElementSibling.style.display="flex"; }}/>
+                        onError={e => {
+                          e.currentTarget.style.display="none";
+                          e.currentTarget.nextElementSibling.style.display="flex";
+                        }}/>
                       <div style={{
                         width:28, height:28, borderRadius:"50%",
                         background:"linear-gradient(135deg,#E8C97A,#B8913A)",
@@ -189,7 +208,6 @@ export default function Navbar() {
                   </svg>
                 </button>
 
-                {/* ── Dropdown menu ── */}
                 {menuOpen && (
                   <div style={{
                     position:"absolute",
@@ -204,7 +222,6 @@ export default function Navbar() {
                     animation:"navFadeIn .18s ease both",
                     zIndex:9999,
                   }}>
-                    {/* User info */}
                     <div style={{ padding:"14px 16px", borderBottom:"1px solid var(--inv-border)" }}>
                       <p style={{ margin:0, fontSize:13, fontWeight:700, color:"var(--inv-text1)" }}>
                         {user.name}
@@ -214,7 +231,6 @@ export default function Navbar() {
                       </p>
                     </div>
 
-                    {/* Menu links */}
                     {[
                       {
                         label:"My Invoices", href:"/invoices",
@@ -253,7 +269,6 @@ export default function Navbar() {
                       </Link>
                     ))}
 
-                    {/* Logout */}
                     <button
                       className="nav-logout"
                       onClick={handleLogout}
@@ -266,8 +281,7 @@ export default function Navbar() {
                         transition:"all .2s", fontFamily:"inherit",
                       }}
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" strokeWidth="2">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                         <polyline points="16 17 21 12 16 7"/>
                         <line x1="21" y1="12" x2="9" y2="12"/>
@@ -279,7 +293,6 @@ export default function Navbar() {
               </div>
 
             ) : (
-              /* Not logged in */
               <div style={{ display:"flex", gap:10 }}>
                 <Link href="/login" style={{
                   padding:"9px 18px", borderRadius:10, textDecoration:"none",
@@ -302,7 +315,7 @@ export default function Navbar() {
               </div>
             )}
 
-          </div>{/* end right group */}
+          </div>
         </div>
       </nav>
     </>
