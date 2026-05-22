@@ -326,17 +326,52 @@ export default function InvoicePrint({
       </p>
 
       {/* ══ PDF Footer ══ */}
-      <div style={{
-        marginTop: 12, paddingTop: 8,
-        borderTop: "1px solid #ddd",
-        textAlign: "center",
-        fontFamily: F, fontSize: 8, color: "#888",
-      }}>
-        <Link href="https://www.invoicewallah.online/" target="_blank" rel="noopener noreferrer"
-          style={{ color: "#888", textDecoration: "none" }}>
-          Powered by: <span style={{ fontWeight: "bold", color: "#555" }}>Invoice Wallah</span>
-        </Link>
-      </div>
+<div
+  style={{
+    marginTop: 12,
+    paddingTop: 8,
+    borderTop: "1px solid #ddd",
+    textAlign: "center",
+    fontFamily: F,
+    fontSize: 13,
+    color: "#888",
+  }}
+>
+  <Link
+    href="https://www.invoicewallah.online/"
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 8,
+     color: "#a19f9f",
+      fontWeight: 600,
+      textDecoration: "none",
+    }}
+  >
+    <img
+      src="/logonew.png" // replace with your logo path
+      alt="Invoice Wallah Logo"
+      style={{
+        width: 24,
+        height: 24,
+        objectFit: "contain",
+        borderRadius: 6,
+      }}
+    />
+
+    <span>
+      Powered by:{" "}
+      <span style={{ fontWeight: "bold", 
+        
+         color: "#2563EB",
+         }}>
+        Invoice Wallah
+      </span>
+    </span>
+  </Link>
+</div>
 
     </div>
   );
