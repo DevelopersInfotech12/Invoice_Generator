@@ -128,9 +128,9 @@ export default function LoginForm({ redirectTo = "/" }) {
           <h1 style={{
             margin:0, fontFamily:"'DM Serif Display',serif",
             fontSize:"clamp(1.6rem,5vw,1.9rem)", fontWeight:400,
-            color:C.white, letterSpacing:"-.01em", lineHeight:1.1,
+            color:"#7e7878a4", letterSpacing:"-.01em", lineHeight:1.1,
           }}>
-            Welcome back
+            Welcome Back
           </h1>
           <p style={{ margin:"8px 0 0", fontSize:13, color:"var(--inv-text3)" }}>
             Sign in to your Invoice Generator account
