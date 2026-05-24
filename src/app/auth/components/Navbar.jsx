@@ -67,34 +67,34 @@ export default function Navbar() {
         <div style={{
           maxWidth: 1160, margin: "0 auto",
           display: "flex", alignItems: "center",
-          justifyContent: "space-between", height: 62,
+          justifyContent: "space-between",
+          height: 60,           /* was 62 → -2px */
         }}>
 
           {/* ── Logo ── */}
-          <Link href="/" style={{ textDecoration:"none", display:"flex", alignItems:"center", gap:10 }}>
+          <Link href="/" style={{ textDecoration:"none", display:"flex", alignItems:"center", gap:9 }}>
             <img
               src="/logonew.png"
               alt="Invoice Wallah"
               style={{
-                width: 36,
-                height: 36,
+                width: 34,       /* was 36 → -2px */
+                height: 34,
                 objectFit: "contain",
                 borderRadius: 8,
               }}
               onError={e => {
-                /* Fallback to SVG if image missing */
                 e.currentTarget.style.display = "none";
                 e.currentTarget.nextElementSibling.style.display = "flex";
               }}
             />
-            {/* SVG fallback — hidden by default */}
+            {/* SVG fallback */}
             <div style={{
-              width:36, height:36, borderRadius:10, flexShrink:0,
+              width:34, height:34, borderRadius:9, flexShrink:0,
               background:"linear-gradient(135deg,#E8C97A,#B8913A)",
               display:"none", alignItems:"center", justifyContent:"center",
               boxShadow:"0 2px 12px rgba(232,201,122,.3)",
             }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1008" strokeWidth="2">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1A1008" strokeWidth="2">
                 <rect x="5" y="2" width="14" height="20" rx="2"/>
                 <line x1="9" y1="7"  x2="15" y2="7"/>
                 <line x1="9" y1="11" x2="15" y2="11"/>
@@ -102,7 +102,8 @@ export default function Navbar() {
               </svg>
             </div>
             <span style={{
-              fontSize:16, fontWeight:700,
+              fontSize:15,        /* was 16 → -1px */
+              fontWeight:700,
               color: "#C5A04B",
               fontFamily:"'Poppins','system-ui',sans-serif", letterSpacing:"-.01em",
             }}>
@@ -111,14 +112,16 @@ export default function Navbar() {
           </Link>
 
           {/* ── Right side ── */}
-          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:9 }}>
 
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
               title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
               style={{
-                width:38, height:38, borderRadius:10, cursor:"pointer",
+                width:36, height:36,   /* was 38 → -2px */
+                borderRadius:9,
+                cursor:"pointer",
                 display:"flex", alignItems:"center", justifyContent:"center",
                 background: "transparent",
                 border: "1px solid var(--inv-border)",
@@ -135,7 +138,7 @@ export default function Navbar() {
               }}
             >
               {theme === "dark" ? (
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="5"/>
                   <line x1="12" y1="1"  x2="12" y2="3"/>
                   <line x1="12" y1="21" x2="12" y2="23"/>
@@ -147,7 +150,7 @@ export default function Navbar() {
                   <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
                 </svg>
               ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                 </svg>
               )}
@@ -161,36 +164,36 @@ export default function Navbar() {
                   className="nav-avatar-btn"
                   onClick={() => setMenuOpen(o => !o)}
                   style={{
-                    display:"flex", alignItems:"center", gap:10,
+                    display:"flex", alignItems:"center", gap:9,
                     background: "rgba(232,201,122,0.10)",
                     border: "1px solid rgba(232,201,122,0.30)",
-                    borderRadius:12, padding:"7px 14px 7px 8px",
+                    borderRadius:11, padding:"6px 13px 6px 7px",  /* was 7/14/7/8 → -1px each */
                     cursor:"pointer", transition:"border-color .2s",
                   }}
                 >
                   {user.avatar ? (
                     <>
                       <img src={user.avatar} alt={user.name}
-                        style={{ width:28, height:28, borderRadius:"50%", objectFit:"cover" }}
+                        style={{ width:27, height:27, borderRadius:"50%", objectFit:"cover" }}  /* was 28 → -1px */
                         onError={e => {
                           e.currentTarget.style.display="none";
                           e.currentTarget.nextElementSibling.style.display="flex";
                         }}/>
                       <div style={{
-                        width:28, height:28, borderRadius:"50%",
+                        width:27, height:27, borderRadius:"50%",
                         background:"linear-gradient(135deg,#E8C97A,#B8913A)",
                         display:"none", alignItems:"center", justifyContent:"center",
-                        fontSize:11, fontWeight:800, color:"#1A1008", flexShrink:0,
+                        fontSize:10, fontWeight:800, color:"#1A1008", flexShrink:0,
                       }}>
                         {initials}
                       </div>
                     </>
                   ) : (
                     <div style={{
-                      width:28, height:28, borderRadius:"50%",
+                      width:27, height:27, borderRadius:"50%",
                       background:"linear-gradient(135deg,#E8C97A,#B8913A)",
                       display:"flex", alignItems:"center", justifyContent:"center",
-                      fontSize:11, fontWeight:800, color:"#1A1008", flexShrink:0,
+                      fontSize:10, fontWeight:800, color:"#1A1008", flexShrink:0,
                     }}>
                       {initials}
                     </div>
@@ -293,9 +296,9 @@ export default function Navbar() {
               </div>
 
             ) : (
-              <div style={{ display:"flex", gap:10 }}>
+              <div style={{ display:"flex", gap:9 }}>
                 <Link href="/login" style={{
-                  padding:"9px 18px", borderRadius:10, textDecoration:"none",
+                  padding:"8px 17px", borderRadius:10, textDecoration:"none",
                   border:"1.5px solid var(--inv-border)",
                   color:"var(--inv-text2)",
                   fontSize:13, fontWeight:600, transition:"all .2s",
@@ -305,7 +308,7 @@ export default function Navbar() {
                   Sign In
                 </Link>
                 <Link href="/register" style={{
-                  padding:"9px 18px", borderRadius:10, textDecoration:"none",
+                  padding:"8px 17px", borderRadius:10, textDecoration:"none",
                   background:"linear-gradient(135deg,#E8C97A,#B8913A)",
                   color:"#1A1008", fontSize:13, fontWeight:700,
                   boxShadow:"0 2px 10px rgba(232,201,122,.25)",

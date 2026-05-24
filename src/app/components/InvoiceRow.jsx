@@ -140,7 +140,7 @@ export function InvoiceRow({
 
       {/* Invoice # */}
       <td className="inv-td" style={{ textAlign:"center" }}>
-        <span style={{ fontSize:13, fontWeight:700, color:"#000000a4" }}>
+        <span style={{ fontSize:13, fontWeight:700, color:"var(--inv-text1)" }}>
           {invoice.invoiceNumber || "Untitled"}
         </span>
       </td>
