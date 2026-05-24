@@ -211,6 +211,9 @@ function InvoicesContent() {
         .inv-td-serial { width: 44px; text-align: center; }
         .inv-td-actions { width: 1px; white-space: nowrap; }
 
+        /* Total col never wraps */
+        .inv-col-total { white-space: nowrap; }
+
         /* action button hovers */
         .inv-btn-edit:hover  { background: rgba(232,201,122,.22) !important; }
         .inv-btn-dup:hover   { background: rgba(96,165,250,.22) !important; }
@@ -248,7 +251,7 @@ function InvoicesContent() {
         .inv-pill-close:hover { opacity:1; }
         .inv-filter-row { flex-wrap:wrap; }
 
-        /* ── Table scroll wrapper on small screens ── */
+        /* ── Table scroll wrapper ── */
         .inv-table-scroll {
           width: 100%;
           overflow-x: auto;
@@ -256,69 +259,70 @@ function InvoicesContent() {
           border-radius: 14px;
         }
         .inv-table-scroll .inv-table {
-          /* min-width keeps columns readable; table scrolls horizontally */
           min-width: 560px;
         }
 
-        /* ── Existing breakpoints ── */
+        /* ── Breakpoints ── */
         @media(max-width:900px) {
           .inv-filter-row { flex-direction:column!important; align-items:stretch!important; }
           .inv-buyer-select { width:100%!important; max-width:100%!important; }
           .inv-date-wrap { width:100%; }
           .inv-filter-divider { display:none!important; }
         }
-        @media(max-width:1000px) { .inv-col-date { display:none!important; } .inv-th-date { display:none!important; } }
+        @media(max-width:1000px) { .inv-col-date  { display:none!important; } .inv-th-date  { display:none!important; } }
         @media(max-width:760px)  { .inv-col-buyer { display:none!important; } .inv-th-buyer { display:none!important; } }
         @media(max-width:560px)  { .inv-td-actions .inv-btn-dup { display:none!important; } }
 
-        /* ── NEW: additional responsive fixes ── */
-
-        /* Header wraps on small screens */
+        /* ── MOBILE ACTION BUTTONS ──
+           Hide text labels, keep icons. Buttons become square icon pads.        */
         @media(max-width:640px) {
-          /* Page header row */
+          /* Page header stacks */
           .inv-page-hdr {
             flex-direction: column !important;
             align-items: flex-start !important;
             gap: 12px !important;
           }
 
-          /* Filter row stacks vertically */
+          /* Filter row stacks */
           .inv-filter-row {
             flex-direction: column !important;
             align-items: stretch !important;
             gap: 8px !important;
           }
           .inv-filter-divider { display: none !important; }
-
-          /* Search fills full width */
           .inv-search-wrap { width: 100% !important; }
-          .inv-search-input { padding: 0 36px 0 38px !important; }
-
-          /* Buyer select fills full width */
-          .inv-buyer-select {
-            width: 100% !important;
-            max-width: 100% !important;
-            min-width: unset !important;
-          }
-
-          /* Date & month pickers fill full width */
+          .inv-buyer-select { width:100%!important; max-width:100%!important; min-width:unset!important; }
           .inv-date-wrap { width: 100%; }
           .inv-sel-month { width: 100% !important; flex: 1; }
 
-          /* Table cells a bit tighter */
-          .inv-td { padding: 10px 8px !important; }
+          /* Tighter cells */
+          .inv-td { padding: 10px 6px !important; }
           .inv-thead-tr th { padding: 8px 6px !important; font-size: 9px !important; }
 
           /* Pagination wraps */
           .inv-pagination { flex-wrap: wrap !important; justify-content: center !important; }
+
+          /* ↓ KEY FIX: hide text labels inside PDF / Edit / Dup buttons */
+          .inv-btn-label { display: none !important; }
+
+          /* Tighter action button padding (icon-only = square feel) */
+          .inv-btn-pdf,
+          .inv-btn-edit,
+          .inv-btn-dup { padding: 5px 6px !important; gap: 0 !important; }
         }
 
-        /* On very small screens hide serial # column and type badge column */
+        /* ── Very small: also hide pin button, hide serial + type cols ── */
         @media(max-width:480px) {
           .inv-td-serial { display: none !important; }
           .inv-th-serial { display: none !important; }
           .inv-col-type  { display: none !important; }
           .inv-th-type   { display: none !important; }
+
+          /* Hide pin on tiny screens — more room for PDF/Edit/Delete */
+          .inv-btn-pin { display: none !important; }
+
+          /* Smaller total font */
+          .inv-col-total span { font-size: 12px !important; }
         }
       `}</style>
 
@@ -341,7 +345,7 @@ function InvoicesContent() {
 
       <div style={{ maxWidth:1300, margin:"0 auto" }}>
 
-        {/* Header — FIXED: added inv-page-hdr class for responsive stacking */}
+        {/* Header */}
         <div className="inv-page-hdr" style={{
           display:"flex", alignItems:"center", justifyContent:"space-between",
           flexWrap:"wrap", gap:16, marginBottom:24, animation:"ifadeup .4s ease both",
@@ -372,7 +376,7 @@ function InvoicesContent() {
           </Link>
         </div>
 
-        {/* Filter row — FIXED: added inv-search-wrap class */}
+        {/* Filter row */}
         <div className="inv-filter-row" style={{ display:"flex", gap:8, marginBottom:10, alignItems:"flex-end" }}>
           {/* Search */}
           <div className="inv-search-wrap" style={{ position:"relative", flex:"1 1 0", minWidth:0 }}>
@@ -534,12 +538,10 @@ function InvoicesContent() {
           </div>
         ) : (
           <>
-            {/* FIXED: wrapped table in scroll div — horizontal scroll on small screens */}
             <div className="inv-table-scroll">
               <table className="inv-table">
                 <thead>
                   <tr className="inv-thead-tr">
-                    {/* FIXED: added inv-th-serial / inv-th-type classes for mobile hide */}
                     <th className="inv-th-serial" style={{ textAlign:"center", width:44 }}>#</th>
                     <th className="inv-th-type" style={{ textAlign:"center" }}>Type</th>
                     <th style={{ textAlign:"center" }}>Invoice #</th>
@@ -580,9 +582,8 @@ function InvoicesContent() {
                   )}
                 </tbody>
               </table>
-            </div>{/* end inv-table-scroll */}
+            </div>
 
-            {/* FIXED: added inv-pagination class for mobile wrap */}
             {totalPages > 1 && (
               <div className="inv-pagination" style={{ display:"flex", justifyContent:"center", gap:8, marginTop:24 }}>
                 <button onClick={() => setPage(p => Math.max(1,p-1))} disabled={page===1}

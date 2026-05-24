@@ -120,14 +120,14 @@ export function InvoiceRow({
   return (
     <tr className={`inv-tr${invoice.isPinned ? " inv-tr-pinned" : ""}`}>
       {/* # */}
-      <td className="inv-td inv-td-serial" style={{ textAlign:"center" }}>
+      <td className="inv-td inv-td-serial inv-th-serial" style={{ textAlign:"center" }}>
         <span style={{ fontSize:12, color:"var(--inv-text4)", fontWeight:600 }}>
           {invoice.isPinned ? "📌" : serial}
         </span>
       </td>
 
       {/* Type badge */}
-      <td className="inv-td" style={{ textAlign:"center" }}>
+      <td className="inv-td inv-col-type" style={{ textAlign:"center" }}>
         <span style={{
           fontSize:9, fontWeight:800, letterSpacing:".08em",
           textTransform:"uppercase", color:C.gold,
@@ -168,7 +168,7 @@ export function InvoiceRow({
       </td>
 
       {/* Total */}
-      <td className="inv-td" style={{ textAlign:"center" }}>
+      <td className="inv-td inv-col-total" style={{ textAlign:"center" }}>
         <span style={{ fontSize:14, fontWeight:800, color:C.gold,
           fontVariantNumeric:"tabular-nums", whiteSpace:"nowrap" }}>{total}</span>
       </td>
@@ -191,8 +191,11 @@ export function InvoiceRow({
             </>
           ) : (
             <>
-              <button onClick={() => onPin(invoice._id)} disabled={pinning}
+              {/* Pin — hidden on ≤420px via CSS */}
+              <button
+                onClick={() => onPin(invoice._id)} disabled={pinning}
                 title={invoice.isPinned ? "Unpin" : "Pin"}
+                className="inv-btn-pin"
                 style={{...btnBase, padding:"3px 6px",
                   background: invoice.isPinned ? "rgba(232,201,122,.15)" : "transparent",
                   color: invoice.isPinned ? C.gold : "var(--inv-text4)",
@@ -200,29 +203,45 @@ export function InvoiceRow({
                 {pinning ? "…" : (invoice.isPinned ? "📌" : "📍")}
               </button>
 
-              <button onClick={() => onDownload(invoice._id)} disabled={downloading}
+              {/* PDF — label hidden on mobile */}
+              <button
+                onClick={() => onDownload(invoice._id)} disabled={downloading}
                 title="Download PDF"
+                className="inv-btn-pdf"
                 style={{...btnBase, background:"rgba(167,139,250,.10)", color:C.purple,
                   border:"1px solid rgba(167,139,250,.22)"}}>
-                {downloading ? <SpinIcon color={C.purple}/> : <><DownloadIcon/> PDF</>}
+                {downloading
+                  ? <SpinIcon color={C.purple}/>
+                  : <><DownloadIcon/><span className="inv-btn-label"> PDF</span></>}
               </button>
 
-              <button onClick={() => router.push("/invoices/"+invoice._id)}
-                className="inv-btn-edit" title="Edit"
+              {/* Edit — label hidden on mobile */}
+              <button
+                onClick={() => router.push("/invoices/"+invoice._id)}
+                title="Edit"
+                className="inv-btn-edit"
                 style={{...btnBase, background:"rgba(232,201,122,0.10)", color:C.gold,
                   border:"1px solid rgba(232,201,122,0.30)"}}>
-                <EditIcon/> Edit
+                <EditIcon/><span className="inv-btn-label"> Edit</span>
               </button>
 
-              <button onClick={() => onDuplicate(invoice)} disabled={duplicating}
-                className="inv-btn-dup" title="Duplicate"
+              {/* Duplicate — hidden on ≤560px (already in existing CSS), label hidden on mobile */}
+              <button
+                onClick={() => onDuplicate(invoice)} disabled={duplicating}
+                title="Duplicate"
+                className="inv-btn-dup"
                 style={{...btnBase, background:"rgba(96,165,250,.10)", color:C.blue,
                   border:"1px solid rgba(96,165,250,.22)"}}>
-                {duplicating ? <SpinIcon color={C.blue}/> : <><CopyIcon/> Duplicate</>}
+                {duplicating
+                  ? <SpinIcon color={C.blue}/>
+                  : <><CopyIcon/><span className="inv-btn-label"> Dup</span></>}
               </button>
 
-              <button onClick={() => setConfirmDelete(true)}
-                className="inv-btn-del" title="Delete"
+              {/* Delete */}
+              <button
+                onClick={() => setConfirmDelete(true)}
+                title="Delete"
+                className="inv-btn-del"
                 style={{...btnBase, padding:"3px 6px", background:"rgba(248,113,113,.07)",
                   color:"var(--inv-text4)", border:"1px solid rgba(248,113,113,.18)"}}>
                 <TrashIcon/>
