@@ -248,7 +248,19 @@ function InvoicesContent() {
         .inv-pill-close:hover { opacity:1; }
         .inv-filter-row { flex-wrap:wrap; }
 
-        /* responsive */
+        /* ── Table scroll wrapper on small screens ── */
+        .inv-table-scroll {
+          width: 100%;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          border-radius: 14px;
+        }
+        .inv-table-scroll .inv-table {
+          /* min-width keeps columns readable; table scrolls horizontally */
+          min-width: 560px;
+        }
+
+        /* ── Existing breakpoints ── */
         @media(max-width:900px) {
           .inv-filter-row { flex-direction:column!important; align-items:stretch!important; }
           .inv-buyer-select { width:100%!important; max-width:100%!important; }
@@ -258,6 +270,56 @@ function InvoicesContent() {
         @media(max-width:1000px) { .inv-col-date { display:none!important; } .inv-th-date { display:none!important; } }
         @media(max-width:760px)  { .inv-col-buyer { display:none!important; } .inv-th-buyer { display:none!important; } }
         @media(max-width:560px)  { .inv-td-actions .inv-btn-dup { display:none!important; } }
+
+        /* ── NEW: additional responsive fixes ── */
+
+        /* Header wraps on small screens */
+        @media(max-width:640px) {
+          /* Page header row */
+          .inv-page-hdr {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+          }
+
+          /* Filter row stacks vertically */
+          .inv-filter-row {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 8px !important;
+          }
+          .inv-filter-divider { display: none !important; }
+
+          /* Search fills full width */
+          .inv-search-wrap { width: 100% !important; }
+          .inv-search-input { padding: 0 36px 0 38px !important; }
+
+          /* Buyer select fills full width */
+          .inv-buyer-select {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: unset !important;
+          }
+
+          /* Date & month pickers fill full width */
+          .inv-date-wrap { width: 100%; }
+          .inv-sel-month { width: 100% !important; flex: 1; }
+
+          /* Table cells a bit tighter */
+          .inv-td { padding: 10px 8px !important; }
+          .inv-thead-tr th { padding: 8px 6px !important; font-size: 9px !important; }
+
+          /* Pagination wraps */
+          .inv-pagination { flex-wrap: wrap !important; justify-content: center !important; }
+        }
+
+        /* On very small screens hide serial # column and type badge column */
+        @media(max-width:480px) {
+          .inv-td-serial { display: none !important; }
+          .inv-th-serial { display: none !important; }
+          .inv-col-type  { display: none !important; }
+          .inv-th-type   { display: none !important; }
+        }
       `}</style>
 
       {/* Toast */}
@@ -279,8 +341,8 @@ function InvoicesContent() {
 
       <div style={{ maxWidth:1300, margin:"0 auto" }}>
 
-        {/* Header */}
-        <div style={{
+        {/* Header — FIXED: added inv-page-hdr class for responsive stacking */}
+        <div className="inv-page-hdr" style={{
           display:"flex", alignItems:"center", justifyContent:"space-between",
           flexWrap:"wrap", gap:16, marginBottom:24, animation:"ifadeup .4s ease both",
         }}>
@@ -301,6 +363,7 @@ function InvoicesContent() {
             background:"linear-gradient(135deg,#E8C97A,#B8913A)",
             color:"#1A1008", fontSize:13, fontWeight:800,
             boxShadow:"0 4px 18px rgba(232,201,122,.28)",
+            flexShrink:0,
           }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -309,10 +372,10 @@ function InvoicesContent() {
           </Link>
         </div>
 
-        {/* Filter row */}
+        {/* Filter row — FIXED: added inv-search-wrap class */}
         <div className="inv-filter-row" style={{ display:"flex", gap:8, marginBottom:10, alignItems:"flex-end" }}>
           {/* Search */}
-          <div style={{ position:"relative", flex:"1 1 0", minWidth:0 }}>
+          <div className="inv-search-wrap" style={{ position:"relative", flex:"1 1 0", minWidth:0 }}>
             <svg style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", pointerEvents:"none", zIndex:1 }}
               width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--inv-text4)" strokeWidth="2">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -471,52 +534,57 @@ function InvoicesContent() {
           </div>
         ) : (
           <>
-            <table className="inv-table">
-              <thead>
-                <tr className="inv-thead-tr">
-                  <th style={{ textAlign:"center", width:44 }}>#</th>
-                  <th style={{ textAlign:"center" }}>Type</th>
-                  <th style={{ textAlign:"center" }}>Invoice #</th>
-                  <th className="inv-th-date" style={{ textAlign:"center" }}>Date</th>
-                  <th className="inv-th-buyer" style={{ textAlign:"center" }}>Buyer</th>
-                  <th style={{ textAlign:"center" }}>Total</th>
-                  <th style={{ textAlign:"center" }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoices.length === 0 ? (
-                  <EmptyState hasFilter={hasFilter} onClear={clearFilters}/>
-                ) : (
-                  <>
-                    {hasPinned && (
-                      <>
-                        <tr className="inv-tr-section inv-tr-section-pin">
-                          <td colSpan={7}>📌 Pinned</td>
-                        </tr>
-                        {invoices.filter(inv => inv.isPinned).map(inv => (
-                          <InvoiceRow {...rowProps(inv)}/>
-                        ))}
-                      </>
-                    )}
-                    {hasUnpinned && (
-                      <>
-                        {hasPinned && (
-                          <tr className="inv-tr-section">
-                            <td colSpan={7}>All invoices</td>
+            {/* FIXED: wrapped table in scroll div — horizontal scroll on small screens */}
+            <div className="inv-table-scroll">
+              <table className="inv-table">
+                <thead>
+                  <tr className="inv-thead-tr">
+                    {/* FIXED: added inv-th-serial / inv-th-type classes for mobile hide */}
+                    <th className="inv-th-serial" style={{ textAlign:"center", width:44 }}>#</th>
+                    <th className="inv-th-type" style={{ textAlign:"center" }}>Type</th>
+                    <th style={{ textAlign:"center" }}>Invoice #</th>
+                    <th className="inv-th-date" style={{ textAlign:"center" }}>Date</th>
+                    <th className="inv-th-buyer" style={{ textAlign:"center" }}>Buyer</th>
+                    <th style={{ textAlign:"center" }}>Total</th>
+                    <th style={{ textAlign:"center" }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoices.length === 0 ? (
+                    <EmptyState hasFilter={hasFilter} onClear={clearFilters}/>
+                  ) : (
+                    <>
+                      {hasPinned && (
+                        <>
+                          <tr className="inv-tr-section inv-tr-section-pin">
+                            <td colSpan={7}>📌 Pinned</td>
                           </tr>
-                        )}
-                        {invoices.filter(inv => !inv.isPinned).map(inv => (
-                          <InvoiceRow {...rowProps(inv)}/>
-                        ))}
-                      </>
-                    )}
-                  </>
-                )}
-              </tbody>
-            </table>
+                          {invoices.filter(inv => inv.isPinned).map(inv => (
+                            <InvoiceRow {...rowProps(inv)}/>
+                          ))}
+                        </>
+                      )}
+                      {hasUnpinned && (
+                        <>
+                          {hasPinned && (
+                            <tr className="inv-tr-section">
+                              <td colSpan={7}>All invoices</td>
+                            </tr>
+                          )}
+                          {invoices.filter(inv => !inv.isPinned).map(inv => (
+                            <InvoiceRow {...rowProps(inv)}/>
+                          ))}
+                        </>
+                      )}
+                    </>
+                  )}
+                </tbody>
+              </table>
+            </div>{/* end inv-table-scroll */}
 
+            {/* FIXED: added inv-pagination class for mobile wrap */}
             {totalPages > 1 && (
-              <div style={{ display:"flex", justifyContent:"center", gap:8, marginTop:24 }}>
+              <div className="inv-pagination" style={{ display:"flex", justifyContent:"center", gap:8, marginTop:24 }}>
                 <button onClick={() => setPage(p => Math.max(1,p-1))} disabled={page===1}
                   style={{ padding:"8px 16px", borderRadius:10, cursor:"pointer",
                     border:"1px solid "+C.border, background:"transparent",

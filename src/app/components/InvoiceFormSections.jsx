@@ -23,6 +23,7 @@ export function InvoiceHeader({
     <div className="inv-hdr" style={{
       display:"flex", alignItems:"center", justifyContent:"space-between",
       gap:14, marginBottom:28, animation:"inv-fadeup .35s ease both",
+      flexWrap:"wrap",                          /* ← FIXED: wrap on small screens */
     }}>
       <div>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
@@ -42,7 +43,10 @@ export function InvoiceHeader({
         </p>
       </div>
 
-      <div className="inv-hdr-actions" style={{ display:"flex", gap:8, alignItems:"center" }}>
+      <div className="inv-hdr-actions" style={{
+        display:"flex", gap:8, alignItems:"center",
+        flexWrap:"wrap",                          /* ← FIXED: buttons wrap on small screens */
+      }}>
         {/* My Invoices */}
         <a href="/invoices" className="inv-btn-ghost" style={{
           display:"inline-flex", alignItems:"center", gap:6,
@@ -141,7 +145,12 @@ export function InvoiceIdentity({ inv, set }) {
   return (
     <Card style={{ marginBottom:16 }}>
       <SectionLabel>Invoice Details</SectionLabel>
-      <div className="inv-grid-3" style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:14 }}>
+      {/* FIXED: auto-fit instead of repeat(3,1fr) — collapses gracefully */}
+      <div className="inv-grid-3" style={{
+        display:"grid",
+        gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",
+        gap:14,
+      }}>
         <Input label="Invoice Number"
           value={inv?.invoiceNumber || ""}
           onChange={e=>set({ invoiceNumber:e.target.value })}/>
@@ -234,7 +243,12 @@ export function PartyCards({ inv, setInv, gstLoading, gstError, setGstError, fet
   const to   = inv?.to   || EMPTY_TO;
 
   return (
-    <div className="inv-2col" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:16 }}>
+    /* FIXED: auto-fit with minmax — stacks to 1 col on narrow screens */
+    <div className="inv-2col" style={{
+      display:"grid",
+      gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",
+      gap:16, marginBottom:16,
+    }}>
       {/* Seller */}
       <Card>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:0 }}>
@@ -316,59 +330,65 @@ export function LineItems({ inv, set, updateItem, subtotal }) {
         </button>
       </div>
 
-      <ScrollShadow>
-        {/* Column headers */}
-        <div className="inv-item-cols" style={{ marginBottom:6, padding:"0 6px" }}>
-          {["Description","HSN / SAC","Qty","Rate (₹)","Unit","Amount (₹)",""].map((h,i)=>(
-            <span key={i} style={{
-              fontSize:10, fontWeight:700, color:T.text4,
-              textTransform:"uppercase", letterSpacing:".08em",
-              textAlign: i>=2&&i<=5 ? "right" : "left",
-            }}>{h}</span>
-          ))}
-        </div>
-        <div style={{ height:1, background:T.border, marginBottom:6 }}/>
+      {/* FIXED: outer scroll wrapper — horizontal scroll on small screens */}
+      <ScrollShadow style={{ overflowX:"auto", WebkitOverflowScrolling:"touch" }}>
+        {/* FIXED: inner min-width so columns don't crush */}
+        <div style={{ minWidth:580 }}>
 
-        {/* Rows */}
-        <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
-          {items.map((item,idx)=>(
-            <div key={idx} className="inv-row inv-item-cols"
-              style={{ padding:"4px 4px", borderRadius:5, transition:"background .12s" }}>
-              <Input value={item?.description||""} onChange={e=>updateItem(idx,"description",e.target.value)}/>
-              <Input value={item?.hsn||""}         onChange={e=>updateItem(idx,"hsn",e.target.value)}/>
-              <Input type="number" value={item?.quantity??1} onChange={e=>updateItem(idx,"quantity",parseFloat(e.target.value)||0)}/>
-              <Input type="number" value={item?.rate??0}     onChange={e=>updateItem(idx,"rate",parseFloat(e.target.value)||0)}/>
-              <Input value={item?.per||"Nos"} onChange={e=>updateItem(idx,"per",e.target.value)}/>
-              <div style={{ textAlign:"right", fontSize:13.5, fontWeight:600, padding:"10px 4px" }}>
-                <AnimNum value={item?.amount||0}/>
+          {/* Column headers */}
+          <div className="inv-item-cols" style={{ marginBottom:6, padding:"0 6px" }}>
+            {["Description","HSN / SAC","Qty","Rate (₹)","Unit","Amount (₹)",""].map((h,i)=>(
+              <span key={i} style={{
+                fontSize:10, fontWeight:700, color:T.text4,
+                textTransform:"uppercase", letterSpacing:".08em",
+                textAlign: i>=2&&i<=5 ? "right" : "left",
+              }}>{h}</span>
+            ))}
+          </div>
+          <div style={{ height:1, background:T.border, marginBottom:6 }}/>
+
+          {/* Rows */}
+          <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
+            {items.map((item,idx)=>(
+              <div key={idx} className="inv-row inv-item-cols"
+                style={{ padding:"4px 4px", borderRadius:5, transition:"background .12s" }}>
+                <Input value={item?.description||""} onChange={e=>updateItem(idx,"description",e.target.value)}/>
+                <Input value={item?.hsn||""}         onChange={e=>updateItem(idx,"hsn",e.target.value)}/>
+                <Input type="number" value={item?.quantity??1} onChange={e=>updateItem(idx,"quantity",parseFloat(e.target.value)||0)}/>
+                <Input type="number" value={item?.rate??0}     onChange={e=>updateItem(idx,"rate",parseFloat(e.target.value)||0)}/>
+                <Input value={item?.per||"Nos"} onChange={e=>updateItem(idx,"per",e.target.value)}/>
+                <div style={{ textAlign:"right", fontSize:13.5, fontWeight:600, padding:"10px 4px" }}>
+                  <AnimNum value={item?.amount||0}/>
+                </div>
+                {items.length > 1
+                  ? <button
+                      onClick={()=>set({ items:items.filter((_,i)=>i!==idx) })}
+                      className="inv-del"
+                      style={{ width:32, height:32, border:"none", background:"transparent",
+                        cursor:"pointer", color:T.text4, borderRadius:4, transition:"all .15s" }}>
+                      ✕
+                    </button>
+                  : <div/>
+                }
               </div>
-              {items.length > 1
-                ? <button
-                    onClick={()=>set({ items:items.filter((_,i)=>i!==idx) })}
-                    className="inv-del"
-                    style={{ width:32, height:32, border:"none", background:"transparent",
-                      cursor:"pointer", color:T.text4, borderRadius:4, transition:"all .15s" }}>
-                    ✕
-                  </button>
-                : <div/>
-              }
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        {/* Subtotal row */}
-        <div style={{
-          display:"flex", justifyContent:"flex-end", alignItems:"center",
-          gap:20, marginTop:10, padding:"10px 8px 0",
-          borderTop:`1px solid ${T.border}`,
-        }}>
-          <span style={{ fontSize:13, color:T.text3, fontWeight:500 }}>Subtotal</span>
-          <span style={{ fontSize:15, fontWeight:700, color:T.text1,
-            fontVariantNumeric:"tabular-nums", minWidth:110, textAlign:"right" }}>
-            <AnimNum value={subtotal||0}/>
-          </span>
-          <div style={{ width:36 }}/>
-        </div>
+          {/* Subtotal row */}
+          <div style={{
+            display:"flex", justifyContent:"flex-end", alignItems:"center",
+            gap:20, marginTop:10, padding:"10px 8px 0",
+            borderTop:`1px solid ${T.border}`,
+          }}>
+            <span style={{ fontSize:13, color:T.text3, fontWeight:500 }}>Subtotal</span>
+            <span style={{ fontSize:15, fontWeight:700, color:T.text1,
+              fontVariantNumeric:"tabular-nums", minWidth:110, textAlign:"right" }}>
+              <AnimNum value={subtotal||0}/>
+            </span>
+            <div style={{ width:36 }}/>
+          </div>
+
+        </div>{/* end minWidth wrapper */}
       </ScrollShadow>
     </Card>
   );
@@ -379,7 +399,12 @@ export function LineItems({ inv, set, updateItem, subtotal }) {
 ══════════════════════════════════════════════════════ */
 export function NotesSummary({ inv, set, isIGST, igstAmt, cgst, sgst, subtotal, total }) {
   return (
-    <div className="inv-2col" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:16 }}>
+    /* FIXED: auto-fit with minmax — stacks on narrow screens */
+    <div className="inv-2col" style={{
+      display:"grid",
+      gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",
+      gap:16, marginBottom:16,
+    }}>
       {/* Notes */}
       <Card>
         <SectionLabel>Declaration &amp; Notes</SectionLabel>
@@ -472,8 +497,7 @@ export function NotesSummary({ inv, set, isIGST, igstAmt, cgst, sgst, subtotal, 
    BANK DETAILS — accordion, default closed, bank dropdown
 ══════════════════════════════════════════════════════ */
 
-/* All Indian banks — static list (no external API needed,
-   list is stable and exhaustive)                         */
+/* All Indian banks — static list */
 const INDIAN_BANKS = [
   "Axis Bank","Bank of Baroda","Bank of India","Bank of Maharashtra",
   "Canara Bank","Central Bank of India","City Union Bank",
@@ -499,12 +523,10 @@ function BankNameDropdown({ value, onChange }) {
   const [focused,  setFocused]  = useState(false);
   const ref = useRef(null);
 
-  /* filter banks by search query */
   const filtered = query.length >= 1
     ? INDIAN_BANKS.filter(b => b.toLowerCase().includes(query.toLowerCase())).slice(0, 12)
     : INDIAN_BANKS.slice(0, 12);
 
-  /* close on outside click */
   useEffect(()=>{
     const h = e => { if(ref.current && !ref.current.contains(e.target)) setOpen(false); };
     document.addEventListener("mousedown", h);
@@ -542,14 +564,12 @@ function BankNameDropdown({ value, onChange }) {
             boxShadow: focused ? "0 0 0 3px rgba(37,99,235,0.08)" : "none",
           }}
         />
-        {/* Chevron */}
         <span style={{
           position:"absolute", right:10, top:"50%", transform:"translateY(-50%)",
           fontSize:14, color:T.text4, pointerEvents:"none",
         }}>▾</span>
       </div>
 
-      {/* Dropdown list */}
       {open && filtered.length > 0 && (
         <div style={{
           position:"absolute", top:"100%", left:0, right:0,
@@ -617,7 +637,8 @@ export function BankDetails({ inv, setBank, onClear }) {
             <polyline points="6 9 12 15 18 9"/>
           </svg>
         </button>
-        {/* Clear button — always visible in header */}
+
+        {/* Clear button */}
         {onClear && (
           <button onClick={onClear} title="Clear bank details" style={{
             display:"inline-flex", alignItems:"center", gap:4,
@@ -646,8 +667,13 @@ export function BankDetails({ inv, setBank, onClear }) {
       }}>
         <div style={{ padding:"4px 22px 22px", borderTop:`1px solid ${T.border}`, marginTop:0 }}>
 
-          {/* Row 1: Bank Name dropdown, Account Holder, Account Number, Confirm */}
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(190px,1fr))", gap:14, marginBottom:14, marginTop:14 }}>
+          {/* Row 1: Bank Name, Account Holder, Account Number, Confirm */}
+          {/* FIXED: auto-fit — 4 cols on wide, 2 on medium, 1 on narrow */}
+          <div style={{
+            display:"grid",
+            gridTemplateColumns:"repeat(auto-fit,minmax(190px,1fr))",
+            gap:14, marginBottom:14, marginTop:14,
+          }}>
             <BankNameDropdown
               value={bank.bankName || ""}
               onChange={v=>setBank("bankName", v)}
@@ -686,7 +712,12 @@ export function BankDetails({ inv, setBank, onClear }) {
           </div>
 
           {/* Row 2: IFSC, Branch, Account Type */}
-          <div className="inv-bank-bottom" style={{ display:"grid", gridTemplateColumns:"1fr 2fr 1fr", gap:14 }}>
+          {/* FIXED: auto-fit — stacks on narrow instead of cramped 1fr 2fr 1fr */}
+          <div className="inv-bank-bottom" style={{
+            display:"grid",
+            gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",
+            gap:14,
+          }}>
             <Input label="IFSC Code "
               value={bank.ifsc || ""}
               mono
