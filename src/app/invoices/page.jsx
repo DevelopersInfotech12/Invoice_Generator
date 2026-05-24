@@ -311,15 +311,16 @@ function InvoicesContent() {
           .inv-btn-dup { padding: 5px 6px !important; gap: 0 !important; }
         }
 
-        /* ── Very small: also hide pin button, hide serial + type cols ── */
+        /* ── Very small: hide type col + pin btn, keep serial visible ── */
         @media(max-width:480px) {
-          .inv-td-serial { display: none !important; }
-          .inv-th-serial { display: none !important; }
-          .inv-col-type  { display: none !important; }
-          .inv-th-type   { display: none !important; }
+          .inv-col-type { display: none !important; }
+          .inv-th-type  { display: none !important; }
 
-          /* Hide pin on tiny screens — more room for PDF/Edit/Delete */
+          /* Hide pin — more room for PDF/Edit/Delete */
           .inv-btn-pin { display: none !important; }
+
+          /* Tighter serial cell */
+          .inv-td-serial { width: 28px !important; padding: 10px 2px !important; }
 
           /* Smaller total font */
           .inv-col-total span { font-size: 12px !important; }

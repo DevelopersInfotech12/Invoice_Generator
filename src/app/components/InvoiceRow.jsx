@@ -120,7 +120,7 @@ export function InvoiceRow({
   return (
     <tr className={`inv-tr${invoice.isPinned ? " inv-tr-pinned" : ""}`}>
       {/* # */}
-      <td className="inv-td inv-td-serial inv-th-serial" style={{ textAlign:"center" }}>
+      <td className="inv-td inv-td-serial" style={{ textAlign:"center" }}>
         <span style={{ fontSize:12, color:"var(--inv-text4)", fontWeight:600 }}>
           {invoice.isPinned ? "📌" : serial}
         </span>
