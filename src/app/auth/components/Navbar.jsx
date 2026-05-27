@@ -52,6 +52,18 @@ export default function Navbar() {
           border-color: rgba(232,201,122,.55) !important;
         }
         @media print { .inv-navbar { display:none !important; } }
+        @media (max-width: 480px) {
+          .inv-navbar-inner { height: 50px !important; }
+          .inv-navbar { padding: 0 12px !important; }
+          .inv-logo-text { font-size: 12px !important; }
+          .inv-logo-img { width: 26px !important; height: 26px !important; }
+          .inv-logo-gap { gap: 6px !important; }
+          .inv-right { gap: 6px !important; }
+          .inv-theme-btn { width: 30px !important; height: 30px !important; }
+          .inv-auth-link { padding: 6px 10px !important; font-size: 11px !important; }
+          .inv-auth-cta  { padding: 6px 10px !important; font-size: 11px !important; }
+          .inv-auth-gap  { gap: 6px !important; }
+        }
       `}</style>
 
       <nav className="inv-navbar" style={{
@@ -64,20 +76,21 @@ export default function Navbar() {
         padding: "0 24px",
         fontFamily: "'DM Sans',sans-serif",
       }}>
-        <div style={{
+        <div className="inv-navbar-inner" style={{
           maxWidth: 1160, margin: "0 auto",
           display: "flex", alignItems: "center",
           justifyContent: "space-between",
-          height: 60,           /* was 62 → -2px */
+          height: 60,
         }}>
 
           {/* ── Logo ── */}
-          <Link href="/" style={{ textDecoration:"none", display:"flex", alignItems:"center", gap:9 }}>
+          <Link href="/" className="inv-logo-gap" style={{ textDecoration:"none", display:"flex", alignItems:"center", gap:9 }}>
             <img
+              className="inv-logo-img"
               src="/logonew.png"
               alt="Invoice Wallah"
               style={{
-                width: 34,       /* was 36 → -2px */
+                width: 34,
                 height: 34,
                 objectFit: "contain",
                 borderRadius: 8,
@@ -101,8 +114,8 @@ export default function Navbar() {
                 <line x1="9" y1="15" x2="12" y2="15"/>
               </svg>
             </div>
-            <span style={{
-              fontSize:15,        /* was 16 → -1px */
+            <span className="inv-logo-text" style={{
+              fontSize:18,
               fontWeight:700,
               color: "#C5A04B",
               fontFamily:"'Poppins','system-ui',sans-serif", letterSpacing:"-.01em",
@@ -112,14 +125,15 @@ export default function Navbar() {
           </Link>
 
           {/* ── Right side ── */}
-          <div style={{ display:"flex", alignItems:"center", gap:9 }}>
+          <div className="inv-right" style={{ display:"flex", alignItems:"center", gap:9 }}>
 
             {/* Theme toggle */}
             <button
+              className="inv-theme-btn"
               onClick={toggleTheme}
               title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
               style={{
-                width:36, height:36,   /* was 38 → -2px */
+                width:36, height:36,
                 borderRadius:9,
                 cursor:"pointer",
                 display:"flex", alignItems:"center", justifyContent:"center",
@@ -296,8 +310,8 @@ export default function Navbar() {
               </div>
 
             ) : (
-              <div style={{ display:"flex", gap:9 }}>
-                <Link href="/login" style={{
+              <div className="inv-auth-gap" style={{ display:"flex", gap:9 }}>
+                <Link href="/login" className="inv-auth-link" style={{
                   padding:"8px 17px", borderRadius:10, textDecoration:"none",
                   border:"1.5px solid var(--inv-border)",
                   color:"var(--inv-text2)",
@@ -307,7 +321,7 @@ export default function Navbar() {
                   onMouseOut={e  => { e.currentTarget.style.borderColor="var(--inv-border)";       e.currentTarget.style.color="var(--inv-text2)"; }}>
                   Sign In
                 </Link>
-                <Link href="/register" style={{
+                <Link href="/register" className="inv-auth-cta" style={{
                   padding:"8px 17px", borderRadius:10, textDecoration:"none",
                   background:"linear-gradient(135deg,#E8C97A,#B8913A)",
                   color:"#1A1008", fontSize:13, fontWeight:700,
